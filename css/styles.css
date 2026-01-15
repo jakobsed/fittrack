@@ -1026,3 +1026,321 @@ body {
     font-weight: 500;
     color: var(--color-gray-600);
 }
+
+/* ============================================
+   V3: Template Selection (Home Page)
+   ============================================ */
+
+.template-selection {
+    padding: var(--spacing-md) 0;
+}
+
+.template-hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin-bottom: var(--spacing-md);
+}
+
+.template-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.template-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-gray-200);
+    background-color: var(--color-white);
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.template-btn:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-gray-100);
+}
+
+.template-btn-name {
+    font-weight: 600;
+    color: var(--color-black);
+}
+
+.template-btn-count {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}
+
+.template-divider {
+    display: flex;
+    align-items: center;
+    margin: var(--spacing-lg) 0;
+}
+
+.template-divider::before,
+.template-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-gray-200);
+}
+
+.template-divider span {
+    padding: 0 var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-400);
+}
+
+/* ============================================
+   V3: Workout Header
+   ============================================ */
+
+.workout-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-gray-200);
+}
+
+.workout-template-name {
+    font-weight: 600;
+    color: var(--color-black);
+}
+
+.workout-clear-btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: none;
+    background: none;
+    color: var(--color-error);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    cursor: pointer;
+}
+
+/* ============================================
+   V3: Template Cards (Templates Page)
+   ============================================ */
+
+.template-card {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.template-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+}
+
+.template-card-name {
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+    color: var(--color-black);
+}
+
+.template-card-count {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}
+
+.template-card-exercises {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+}
+
+.template-exercise-tag {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-600);
+}
+
+.template-exercise-more {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-400);
+    padding: var(--spacing-xs);
+}
+
+.template-card-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.template-edit-btn,
+.template-delete-btn {
+    flex: 1;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    background: none;
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.template-edit-btn {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.template-delete-btn:hover {
+    background-color: var(--color-error);
+    border-color: var(--color-error);
+    color: var(--color-white);
+}
+
+/* ============================================
+   V3: Template Editor
+   ============================================ */
+
+.template-editor {
+    padding: 0;
+}
+
+.editor-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.editor-back-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    background: none;
+    color: var(--color-gray-600);
+    font-family: var(--font-family);
+    cursor: pointer;
+}
+
+.editor-title-input {
+    flex: 1;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    font-family: var(--font-family);
+}
+
+.editor-title-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.editor-exercises-list {
+    margin-bottom: var(--spacing-lg);
+}
+
+.editor-empty {
+    color: var(--color-gray-400);
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.editor-exercise-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.editor-exercise-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.editor-exercise-name {
+    font-weight: 500;
+}
+
+.editor-exercise-muscle {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-500);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-sm);
+}
+
+.editor-exercise-remove {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    color: var(--color-gray-400);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+}
+
+.editor-exercise-remove:hover {
+    background-color: var(--color-error);
+    color: var(--color-white);
+}
+
+/* ============================================
+   V3: Volume Chart
+   ============================================ */
+
+.chart-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.chart-container {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+}
+
+.chart-empty {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-gray-400);
+}
+
+.volume-chart {
+    width: 100%;
+    height: auto;
+}
+
+.chart-line {
+    stroke: var(--color-accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart-grid-line {
+    stroke: var(--color-gray-200);
+    stroke-width: 1;
+    stroke-dasharray: 4, 4;
+}
+
+.chart-label {
+    font-size: 10px;
+    fill: var(--color-gray-500);
+}

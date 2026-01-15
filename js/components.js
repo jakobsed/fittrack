@@ -1,6 +1,6 @@
 /**
- * FitTrack - UI Components Module V2
- * Reusable UI component generators
+ * FitTrack - UI Components V3
+ * Workout templates, exercises, and chart components
  */
 
 const Components = {
@@ -76,21 +76,76 @@ const Components = {
         return `${month} ${year} - Woche ${weekNum}`;
     },
 
-    // V2: Simplified exercise rendering
-    renderExercises(exercises) {
-        if (!exercises || exercises.length === 0) {
+    // ==========================================
+    // Workout Template Selection (Home Page)
+    // ==========================================
+
+    renderTemplateSelection(templates, hasWorkout) {
+        if (hasWorkout) {
+            return ''; // Don't show if workout already exists
+        }
+
+        if (!templates || templates.length === 0) {
             return `
-                <div class="empty-state">
-                    <div class="empty-state-icon">🏋️</div>
-                    <p class="empty-state-text">Noch keine Übungen für heute.</p>
+                <div class="template-selection">
+                    <p class="template-hint">Erstelle zuerst eine Workout-Vorlage in der Datenbank.</p>
+                    <button class="add-exercise-btn" id="add-exercise-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Einzelne Übung hinzufügen
+                    </button>
                 </div>
             `;
         }
 
-        return exercises.map(exercise => this.renderExerciseCard(exercise)).join('');
+        const templateButtons = templates.map(t => `
+            <button class="template-btn" data-template-id="${t.id}">
+                <span class="template-btn-name">${this.escapeHtml(t.name)}</span>
+                <span class="template-btn-count">${t.exercises?.length || 0} Übungen</span>
+            </button>
+        `).join('');
+
+        return `
+            <div class="template-selection">
+                <p class="template-hint">Workout auswählen:</p>
+                <div class="template-buttons">
+                    ${templateButtons}
+                </div>
+                <div class="template-divider">
+                    <span>oder</span>
+                </div>
+                <button class="add-exercise-btn" id="add-exercise-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Einzelne Übung hinzufügen
+                </button>
+            </div>
+        `;
     },
 
-    // V2: Simplified exercise card with sets/weight/reps
+    // ==========================================
+    // Exercise Tracking
+    // ==========================================
+
+    renderExercises(exercises, templateName = null) {
+        if (!exercises || exercises.length === 0) {
+            return '';
+        }
+
+        const header = templateName ? `
+            <div class="workout-header">
+                <span class="workout-template-name">${this.escapeHtml(templateName)}</span>
+                <button class="workout-clear-btn" id="clear-workout-btn">Löschen</button>
+            </div>
+        ` : '';
+
+        return header + exercises.map(exercise => this.renderExerciseCard(exercise)).join('');
+    },
+
     renderExerciseCard(exercise) {
         const completedClass = exercise.completed ? 'completed' : '';
         const muscleTag = exercise.muscleGroup
@@ -101,20 +156,12 @@ const Components = {
             <div class="exercise-card" data-exercise-id="${exercise.id}">
                 <div class="exercise-header">
                     <span class="exercise-name">${this.escapeHtml(exercise.name)}${muscleTag}</span>
-                    <div style="position: relative;">
-                        <button class="exercise-menu-btn" data-action="menu" data-exercise-id="${exercise.id}">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="5" r="1"></circle>
-                                <circle cx="12" cy="12" r="1"></circle>
-                                <circle cx="12" cy="19" r="1"></circle>
-                            </svg>
-                        </button>
-                        <div class="exercise-menu" id="menu-${exercise.id}">
-                            <button class="exercise-menu-item delete" data-action="delete" data-exercise-id="${exercise.id}">
-                                Löschen
-                            </button>
-                        </div>
-                    </div>
+                    <button class="exercise-menu-btn" data-action="delete" data-exercise-id="${exercise.id}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
                 </div>
                 <div class="exercise-inputs">
                     <div class="exercise-input-group">
@@ -155,60 +202,79 @@ const Components = {
         `;
     },
 
-    // V2: Exercise database list
-    renderExerciseDatabase(exercises) {
-        if (!exercises || exercises.length === 0) {
+    // ==========================================
+    // Workout Templates (Database Page)
+    // ==========================================
+
+    renderTemplatesList(templates) {
+        if (!templates || templates.length === 0) {
             return `
                 <div class="empty-state">
-                    <div class="empty-state-icon">📚</div>
-                    <p class="empty-state-text">Noch keine Übungen in der Datenbank.</p>
+                    <div class="empty-state-icon">📋</div>
+                    <p class="empty-state-text">Noch keine Workout-Vorlagen erstellt.</p>
                 </div>
             `;
         }
 
-        return exercises.map(exercise => `
-            <div class="db-exercise-card" data-exercise-id="${exercise.id}">
-                <div class="db-exercise-info">
-                    <span class="db-exercise-name">${this.escapeHtml(exercise.name)}</span>
-                    ${exercise.muscleGroup ? `<span class="db-exercise-muscle">${this.escapeHtml(exercise.muscleGroup)}</span>` : ''}
+        return templates.map(template => `
+            <div class="template-card" data-template-id="${template.id}">
+                <div class="template-card-header">
+                    <span class="template-card-name">${this.escapeHtml(template.name)}</span>
+                    <span class="template-card-count">${template.exercises?.length || 0} Übungen</span>
                 </div>
-                <button class="db-exercise-delete" data-action="delete-db" data-exercise-id="${exercise.id}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                </button>
+                <div class="template-card-exercises">
+                    ${(template.exercises || []).slice(0, 3).map(ex =>
+            `<span class="template-exercise-tag">${this.escapeHtml(ex.name)}</span>`
+        ).join('')}
+                    ${(template.exercises?.length || 0) > 3 ? `<span class="template-exercise-more">+${template.exercises.length - 3} mehr</span>` : ''}
+                </div>
+                <div class="template-card-actions">
+                    <button class="template-edit-btn" data-action="edit" data-template-id="${template.id}">Bearbeiten</button>
+                    <button class="template-delete-btn" data-action="delete-template" data-template-id="${template.id}">Löschen</button>
+                </div>
             </div>
         `).join('');
     },
 
-    // V2: Muscle group statistics bars
-    renderMuscleStats(muscleStats) {
-        const groups = Object.keys(muscleStats);
-        if (groups.length === 0) {
-            return `
-                <div class="empty-state" style="padding: 1rem;">
-                    <p class="empty-state-text">Noch keine Daten vorhanden.</p>
+    renderTemplateEditor(template) {
+        const exercisesList = (template.exercises || []).map(ex => `
+            <div class="editor-exercise-item" data-exercise-id="${ex.id}">
+                <div class="editor-exercise-info">
+                    <span class="editor-exercise-name">${this.escapeHtml(ex.name)}</span>
+                    ${ex.muscleGroup ? `<span class="editor-exercise-muscle">${this.escapeHtml(ex.muscleGroup)}</span>` : ''}
                 </div>
-            `;
-        }
+                <button class="editor-exercise-remove" data-action="remove-exercise" data-exercise-id="${ex.id}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        `).join('');
 
-        const maxSets = Math.max(...Object.values(muscleStats), 1);
-
-        return groups.map(group => {
-            const sets = muscleStats[group];
-            const percentage = (sets / maxSets) * 100;
-            return `
-                <div class="muscle-stat-row">
-                    <span class="muscle-stat-label">${this.escapeHtml(group)}</span>
-                    <div class="muscle-stat-bar-container">
-                        <div class="muscle-stat-bar" style="width: ${percentage}%"></div>
-                    </div>
-                    <span class="muscle-stat-value">${sets}</span>
+        return `
+            <div class="template-editor">
+                <div class="editor-header">
+                    <button class="editor-back-btn" id="editor-back">← Zurück</button>
+                    <input type="text" class="editor-title-input" id="editor-title" value="${this.escapeHtml(template.name)}">
                 </div>
-            `;
-        }).join('');
+                <div class="editor-exercises-list" id="editor-exercises-list">
+                    ${exercisesList || '<p class="editor-empty">Noch keine Übungen in dieser Vorlage.</p>'}
+                </div>
+                <button class="add-exercise-btn" id="add-template-exercise-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Übung hinzufügen
+                </button>
+            </div>
+        `;
     },
+
+    // ==========================================
+    // Statistics & Chart
+    // ==========================================
 
     renderStatsGrid(stats) {
         return `
@@ -232,36 +298,97 @@ const Components = {
     },
 
     formatVolume(volume) {
-        if (volume >= 1000000) {
-            return (volume / 1000000).toFixed(1) + 'M';
-        }
-        if (volume >= 1000) {
-            return (volume / 1000).toFixed(1) + 'K';
-        }
+        if (volume >= 1000000) return (volume / 1000000).toFixed(1) + 'M';
+        if (volume >= 1000) return (volume / 1000).toFixed(1) + 'K';
         return volume.toString();
+    },
+
+    renderMuscleStats(muscleStats) {
+        const groups = Object.keys(muscleStats);
+        if (groups.length === 0) {
+            return `<div class="empty-state" style="padding: 1rem;"><p class="empty-state-text">Noch keine Daten.</p></div>`;
+        }
+
+        const maxSets = Math.max(...Object.values(muscleStats), 1);
+
+        return groups.map(group => {
+            const sets = muscleStats[group];
+            const percentage = (sets / maxSets) * 100;
+            return `
+                <div class="muscle-stat-row">
+                    <span class="muscle-stat-label">${this.escapeHtml(group)}</span>
+                    <div class="muscle-stat-bar-container">
+                        <div class="muscle-stat-bar" style="width: ${percentage}%"></div>
+                    </div>
+                    <span class="muscle-stat-value">${sets}</span>
+                </div>
+            `;
+        }).join('');
+    },
+
+    renderVolumeChart(volumeHistory) {
+        if (!volumeHistory || volumeHistory.length < 2) {
+            return `<div class="chart-empty"><p>Mindestens 2 Workouts benötigt für Chart.</p></div>`;
+        }
+
+        const width = 320;
+        const height = 160;
+        const padding = { top: 20, right: 40, bottom: 30, left: 10 };
+        const chartWidth = width - padding.left - padding.right;
+        const chartHeight = height - padding.top - padding.bottom;
+
+        const volumes = volumeHistory.map(d => d.volume);
+        const minVolume = Math.min(...volumes) * 0.9;
+        const maxVolume = Math.max(...volumes) * 1.1;
+
+        const xScale = (i) => padding.left + (i / (volumeHistory.length - 1)) * chartWidth;
+        const yScale = (v) => padding.top + chartHeight - ((v - minVolume) / (maxVolume - minVolume)) * chartHeight;
+
+        // Create path
+        const pathData = volumeHistory.map((d, i) =>
+            `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(d.volume)}`
+        ).join(' ');
+
+        // Grid lines
+        const gridLines = [0.25, 0.5, 0.75].map(p => {
+            const y = padding.top + chartHeight * (1 - p);
+            const value = Math.round(minVolume + (maxVolume - minVolume) * p);
+            return `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" class="chart-grid-line"/>
+                    <text x="${width - padding.right + 5}" y="${y + 4}" class="chart-label">${this.formatVolume(value)}</text>`;
+        }).join('');
+
+        // Date labels
+        const firstDate = new Date(volumeHistory[0].date);
+        const lastDate = new Date(volumeHistory[volumeHistory.length - 1].date);
+        const dateLabels = `
+            <text x="${padding.left}" y="${height - 5}" class="chart-label">${firstDate.getDate()}.${firstDate.getMonth() + 1}</text>
+            <text x="${width - padding.right}" y="${height - 5}" class="chart-label" text-anchor="end">${lastDate.getDate()}.${lastDate.getMonth() + 1}</text>
+        `;
+
+        return `
+            <svg class="volume-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+                ${gridLines}
+                ${dateLabels}
+                <path d="${pathData}" class="chart-line" fill="none"/>
+            </svg>
+        `;
     },
 
     renderRecentWorkouts(workouts) {
         if (workouts.length === 0) {
-            return `
-                <div class="empty-state">
-                    <p class="empty-state-text">Noch keine Workouts aufgezeichnet.</p>
-                </div>
-            `;
+            return `<div class="empty-state"><p class="empty-state-text">Noch keine Workouts.</p></div>`;
         }
 
         return workouts.map(workout => {
             const date = new Date(workout.date);
             const dateDisplay = this.formatDateDisplay(date);
+            const name = workout.templateName || 'Workout';
             const exerciseCount = workout.exercises ? workout.exercises.length : 0;
-            const setCount = workout.exercises
-                ? workout.exercises.reduce((sum, ex) => sum + (ex.completed ? (parseInt(ex.sets) || 0) : 0), 0)
-                : 0;
 
             return `
                 <div class="workout-item">
                     <span class="workout-date">${dateDisplay}</span>
-                    <span class="workout-summary">${exerciseCount} Übungen · ${setCount} Sets</span>
+                    <span class="workout-summary">${this.escapeHtml(name)} · ${exerciseCount} Übungen</span>
                 </div>
             `;
         }).join('');

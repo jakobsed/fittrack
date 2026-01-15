@@ -1,6 +1,6 @@
 /**
- * FitTrack - Storage Module V2
- * Handles all LocalStorage operations for workout data and exercise database
+ * FitTrack - Storage Module V3
+ * Handles workout templates, workout tracking, and statistics
  */
 
 const Storage = {
@@ -8,82 +8,117 @@ const Storage = {
 
     /**
      * Get all data from LocalStorage
-     * @returns {Object} Data object with workouts and exerciseDatabase
      */
     getData() {
         const data = localStorage.getItem(this.STORAGE_KEY);
         if (data) {
             return JSON.parse(data);
         }
-        return { workouts: {}, exerciseDatabase: [] };
+        return { workouts: {}, workoutTemplates: [] };
     },
 
     /**
      * Save all data to LocalStorage
-     * @param {Object} data - Data object
      */
     saveData(data) {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     },
 
     // ==========================================
-    // Exercise Database Functions
+    // Workout Templates
     // ==========================================
 
     /**
-     * Get all exercises from database
-     * @returns {Array} Array of exercise objects
+     * Get all workout templates
      */
-    getExerciseDatabase() {
+    getWorkoutTemplates() {
         const data = this.getData();
-        return data.exerciseDatabase || [];
+        return data.workoutTemplates || [];
     },
 
     /**
-     * Add exercise to database
-     * @param {Object} exercise - Exercise object with name and muscleGroup
+     * Get a single template by ID
      */
-    addToExerciseDatabase(exercise) {
+    getTemplateById(templateId) {
+        const templates = this.getWorkoutTemplates();
+        return templates.find(t => t.id === templateId) || null;
+    },
+
+    /**
+     * Create a new workout template
+     */
+    createTemplate(name) {
         const data = this.getData();
-        if (!data.exerciseDatabase) {
-            data.exerciseDatabase = [];
+        if (!data.workoutTemplates) {
+            data.workoutTemplates = [];
         }
-        exercise.id = this.generateId();
-        data.exerciseDatabase.push(exercise);
+        const template = {
+            id: this.generateId(),
+            name: name,
+            exercises: []
+        };
+        data.workoutTemplates.push(template);
         this.saveData(data);
-        return exercise;
+        return template;
     },
 
     /**
-     * Delete exercise from database
-     * @param {string} exerciseId - Exercise ID
+     * Update template name
      */
-    deleteFromExerciseDatabase(exerciseId) {
+    updateTemplateName(templateId, name) {
         const data = this.getData();
-        if (data.exerciseDatabase) {
-            data.exerciseDatabase = data.exerciseDatabase.filter(ex => ex.id !== exerciseId);
+        const template = data.workoutTemplates?.find(t => t.id === templateId);
+        if (template) {
+            template.name = name;
             this.saveData(data);
         }
     },
 
     /**
-     * Get exercise from database by ID
-     * @param {string} exerciseId - Exercise ID
-     * @returns {Object|null} Exercise object or null
+     * Delete a workout template
      */
-    getExerciseById(exerciseId) {
-        const exercises = this.getExerciseDatabase();
-        return exercises.find(ex => ex.id === exerciseId) || null;
+    deleteTemplate(templateId) {
+        const data = this.getData();
+        if (data.workoutTemplates) {
+            data.workoutTemplates = data.workoutTemplates.filter(t => t.id !== templateId);
+            this.saveData(data);
+        }
+    },
+
+    /**
+     * Add exercise to template
+     */
+    addExerciseToTemplate(templateId, exercise) {
+        const data = this.getData();
+        const template = data.workoutTemplates?.find(t => t.id === templateId);
+        if (template) {
+            if (!template.exercises) template.exercises = [];
+            exercise.id = this.generateId();
+            template.exercises.push(exercise);
+            this.saveData(data);
+        }
+        return template;
+    },
+
+    /**
+     * Remove exercise from template
+     */
+    removeExerciseFromTemplate(templateId, exerciseId) {
+        const data = this.getData();
+        const template = data.workoutTemplates?.find(t => t.id === templateId);
+        if (template && template.exercises) {
+            template.exercises = template.exercises.filter(e => e.id !== exerciseId);
+            this.saveData(data);
+        }
+        return template;
     },
 
     // ==========================================
-    // Workout Functions
+    // Workout Tracking
     // ==========================================
 
     /**
      * Get workout for a specific date
-     * @param {string} dateKey - Date in YYYY-MM-DD format
-     * @returns {Object|null} Workout object or null
      */
     getWorkout(dateKey) {
         const data = this.getData();
@@ -91,20 +126,36 @@ const Storage = {
     },
 
     /**
-     * Save workout for a specific date
-     * @param {string} dateKey - Date in YYYY-MM-DD format
-     * @param {Object} workout - Workout object with exercises
+     * Start workout from template
      */
-    saveWorkout(dateKey, workout) {
+    startWorkoutFromTemplate(dateKey, templateId) {
+        const template = this.getTemplateById(templateId);
+        if (!template) return null;
+
+        const exercises = template.exercises.map(ex => ({
+            id: this.generateId(),
+            name: ex.name,
+            muscleGroup: ex.muscleGroup,
+            sets: ex.defaultSets || '',
+            weight: ex.defaultWeight || '',
+            reps: ex.defaultReps || '',
+            completed: false
+        }));
+
+        const workout = {
+            templateId: templateId,
+            templateName: template.name,
+            exercises: exercises
+        };
+
         const data = this.getData();
         data.workouts[dateKey] = workout;
         this.saveData(data);
+        return workout;
     },
 
     /**
-     * Add exercise to a specific date (V2: simplified format)
-     * @param {string} dateKey - Date in YYYY-MM-DD format
-     * @param {Object} exercise - Exercise object
+     * Add single exercise to a date
      */
     addExercise(dateKey, exercise) {
         const data = this.getData();
@@ -117,22 +168,14 @@ const Storage = {
     },
 
     /**
-     * Update exercise for a specific date
-     * @param {string} dateKey - Date in YYYY-MM-DD format
-     * @param {string} exerciseId - Exercise ID
-     * @param {Object} updates - Updated exercise properties
+     * Update exercise in workout
      */
     updateExercise(dateKey, exerciseId, updates) {
         const data = this.getData();
         if (data.workouts[dateKey]) {
-            const exerciseIndex = data.workouts[dateKey].exercises.findIndex(
-                ex => ex.id === exerciseId
-            );
-            if (exerciseIndex !== -1) {
-                data.workouts[dateKey].exercises[exerciseIndex] = {
-                    ...data.workouts[dateKey].exercises[exerciseIndex],
-                    ...updates
-                };
+            const exercise = data.workouts[dateKey].exercises.find(ex => ex.id === exerciseId);
+            if (exercise) {
+                Object.assign(exercise, updates);
                 this.saveData(data);
             }
         }
@@ -140,9 +183,7 @@ const Storage = {
     },
 
     /**
-     * Delete exercise from a specific date
-     * @param {string} dateKey - Date in YYYY-MM-DD format
-     * @param {string} exerciseId - Exercise ID
+     * Delete exercise from workout
      */
     deleteExercise(dateKey, exerciseId) {
         const data = this.getData();
@@ -159,8 +200,16 @@ const Storage = {
     },
 
     /**
+     * Clear workout for a date
+     */
+    clearWorkout(dateKey) {
+        const data = this.getData();
+        delete data.workouts[dateKey];
+        this.saveData(data);
+    },
+
+    /**
      * Get dates that have workouts
-     * @returns {string[]} Array of date keys
      */
     getWorkoutDates() {
         const data = this.getData();
@@ -168,12 +217,11 @@ const Storage = {
     },
 
     // ==========================================
-    // Statistics Functions
+    // Statistics
     // ==========================================
 
     /**
-     * Calculate statistics (V2: with muscle groups)
-     * @returns {Object} Statistics object
+     * Calculate basic statistics
      */
     getStatistics() {
         const data = this.getData();
@@ -201,7 +249,7 @@ const Storage = {
             }
         });
 
-        // Get this week's workouts
+        // This week's workouts
         const today = new Date();
         const startOfWeek = new Date(today);
         startOfWeek.setDate(today.getDate() - today.getDay() + 1);
@@ -222,8 +270,7 @@ const Storage = {
     },
 
     /**
-     * Get sets per muscle group (V2)
-     * @returns {Object} Object with muscle groups as keys and set counts as values
+     * Get sets per muscle group
      */
     getMuscleGroupStats() {
         const data = this.getData();
@@ -248,9 +295,38 @@ const Storage = {
     },
 
     /**
+     * Get volume history for chart (V3)
+     * Returns array of {date, volume} sorted by date
+     */
+    getVolumeHistory() {
+        const data = this.getData();
+        const workouts = data.workouts;
+        const history = [];
+
+        Object.entries(workouts).forEach(([date, workout]) => {
+            let dayVolume = 0;
+            if (workout.exercises) {
+                workout.exercises.forEach(exercise => {
+                    if (exercise.completed) {
+                        const sets = parseInt(exercise.sets) || 0;
+                        const weight = parseFloat(exercise.weight) || 0;
+                        const reps = parseInt(exercise.reps) || 0;
+                        dayVolume += weight * reps * sets;
+                    }
+                });
+            }
+            if (dayVolume > 0) {
+                history.push({ date, volume: Math.round(dayVolume) });
+            }
+        });
+
+        // Sort by date
+        history.sort((a, b) => new Date(a.date) - new Date(b.date));
+        return history;
+    },
+
+    /**
      * Get recent workouts
-     * @param {number} limit - Number of workouts to return
-     * @returns {Array} Array of recent workout objects with dates
      */
     getRecentWorkouts(limit = 5) {
         const data = this.getData();
@@ -266,8 +342,7 @@ const Storage = {
     },
 
     /**
-     * Generate a unique ID
-     * @returns {string} Unique ID
+     * Generate unique ID
      */
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);

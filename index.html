@@ -47,10 +47,12 @@
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
                 </button>
-                <button class="nav-btn" data-view="exercises" id="nav-exercises">
+                <button class="nav-btn" data-view="templates" id="nav-templates">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
                     </svg>
                 </button>
                 <button class="nav-btn" data-view="stats" id="nav-stats">
@@ -87,40 +89,30 @@
                     <!-- Days will be rendered by JavaScript -->
                 </div>
 
-                <div class="day-workout" id="day-workout">
+                <div class="day-workout">
                     <div class="day-header">
                         <h3 class="day-title" id="day-title">Mittwoch, 15. Januar</h3>
                     </div>
-
-                    <div class="exercises-list" id="exercises-list">
-                        <!-- Exercises will be rendered by JavaScript -->
+                    <div id="day-workout">
+                        <!-- Content rendered by JavaScript -->
                     </div>
-
-                    <button class="add-exercise-btn" id="add-exercise-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Übung hinzufügen
-                    </button>
                 </div>
             </section>
 
-            <!-- Exercises Database View -->
-            <section id="exercises-view" class="view">
-                <h2 class="section-title">Meine Übungen</h2>
+            <!-- Templates View -->
+            <section id="templates-view" class="view">
+                <h2 class="section-title">Workout-Vorlagen</h2>
 
-                <div class="exercises-database-list" id="exercises-database-list">
-                    <!-- Exercises will be rendered by JavaScript -->
+                <div id="templates-content">
+                    <!-- Templates list or editor rendered by JavaScript -->
                 </div>
 
-                <button class="add-exercise-btn" id="add-db-exercise-btn">
+                <button class="add-exercise-btn" id="add-template-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Übung zur Datenbank hinzufügen
+                    Neue Vorlage erstellen
                 </button>
             </section>
 
@@ -128,22 +120,30 @@
             <section id="stats-view" class="view">
                 <h2 class="section-title">Statistiken</h2>
 
+                <!-- Volume Chart -->
+                <div class="chart-section">
+                    <h3 class="subsection-title">Volume über Zeit</h3>
+                    <div class="chart-container" id="volume-chart">
+                        <!-- Chart rendered by JavaScript -->
+                    </div>
+                </div>
+
                 <!-- Muscle Group Stats -->
                 <div class="muscle-stats-section">
                     <h3 class="subsection-title">Sets pro Muskelgruppe</h3>
                     <div class="muscle-stats-list" id="muscle-stats-list">
-                        <!-- Muscle group stats will be rendered by JavaScript -->
+                        <!-- Muscle group stats rendered by JavaScript -->
                     </div>
                 </div>
 
                 <div class="stats-grid" id="stats-grid">
-                    <!-- Stats cards will be rendered by JavaScript -->
+                    <!-- Stats cards rendered by JavaScript -->
                 </div>
 
                 <div class="recent-workouts">
                     <h3 class="subsection-title">Letzte Workouts</h3>
                     <div class="workouts-list" id="recent-workouts-list">
-                        <!-- Recent workouts will be rendered by JavaScript -->
+                        <!-- Recent workouts rendered by JavaScript -->
                     </div>
                 </div>
             </section>
