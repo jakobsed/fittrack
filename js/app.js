@@ -89,6 +89,13 @@ const App = {
             }
         });
 
+        // Also listen for 'input' events for real-time saving
+        document.getElementById('exercises-list').addEventListener('input', (e) => {
+            if (e.target.matches('.exercise-input-group input')) {
+                this.handleExerciseInputChange(e);
+            }
+        });
+
         // Exercise database events (delegated)
         document.getElementById('exercises-database-list').addEventListener('click', (e) => {
             this.handleDatabaseAction(e);
