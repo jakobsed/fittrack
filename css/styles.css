@@ -1273,8 +1273,7 @@ body {
 
 .editor-exercise-item {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     padding: var(--spacing-md);
     background-color: var(--color-white);
     border: 1px solid var(--color-gray-200);
@@ -1282,14 +1281,16 @@ body {
     margin-bottom: var(--spacing-sm);
 }
 
-.editor-exercise-info {
+.editor-exercise-header {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
 }
 
 .editor-exercise-name {
     font-weight: 500;
+    flex: 1;
 }
 
 .editor-exercise-muscle {
@@ -1298,6 +1299,39 @@ body {
     padding: var(--spacing-xs) var(--spacing-sm);
     background-color: var(--color-gray-100);
     border-radius: var(--radius-sm);
+}
+
+.editor-exercise-defaults {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-sm);
+}
+
+.editor-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.editor-input-group label {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-500);
+    text-transform: uppercase;
+}
+
+.editor-input-group input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-family: var(--font-family);
+    text-align: center;
+}
+
+.editor-input-group input:focus {
+    outline: none;
+    border-color: var(--color-accent);
 }
 
 .editor-exercise-remove {

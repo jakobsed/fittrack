@@ -113,6 +113,39 @@ const Storage = {
         return template;
     },
 
+    /**
+     * Update exercise defaults in template
+     */
+    updateExerciseInTemplate(templateId, exerciseId, updates) {
+        const data = this.getData();
+        const template = data.workoutTemplates?.find(t => t.id === templateId);
+        if (template && template.exercises) {
+            const exercise = template.exercises.find(e => e.id === exerciseId);
+            if (exercise) {
+                Object.assign(exercise, updates);
+                this.saveData(data);
+            }
+        }
+        return template;
+    },
+
+    /**
+     * Sync workout values back to template (when user changes during workout)
+     */
+    syncWorkoutToTemplate(templateId, exerciseName, updates) {
+        const data = this.getData();
+        const template = data.workoutTemplates?.find(t => t.id === templateId);
+        if (template && template.exercises) {
+            const exercise = template.exercises.find(e => e.name === exerciseName);
+            if (exercise) {
+                if (updates.sets) exercise.defaultSets = updates.sets;
+                if (updates.weight) exercise.defaultWeight = updates.weight;
+                if (updates.reps) exercise.defaultReps = updates.reps;
+                this.saveData(data);
+            }
+        }
+    },
+
     // ==========================================
     // Workout Tracking
     // ==========================================

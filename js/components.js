@@ -239,16 +239,33 @@ const Components = {
     renderTemplateEditor(template) {
         const exercisesList = (template.exercises || []).map(ex => `
             <div class="editor-exercise-item" data-exercise-id="${ex.id}">
-                <div class="editor-exercise-info">
+                <div class="editor-exercise-header">
                     <span class="editor-exercise-name">${this.escapeHtml(ex.name)}</span>
                     ${ex.muscleGroup ? `<span class="editor-exercise-muscle">${this.escapeHtml(ex.muscleGroup)}</span>` : ''}
+                    <button class="editor-exercise-remove" data-action="remove-exercise" data-exercise-id="${ex.id}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
                 </div>
-                <button class="editor-exercise-remove" data-action="remove-exercise" data-exercise-id="${ex.id}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                <div class="editor-exercise-defaults">
+                    <div class="editor-input-group">
+                        <label>Sets</label>
+                        <input type="number" value="${ex.defaultSets || ''}" placeholder="3" 
+                               data-field="defaultSets" data-exercise-id="${ex.id}" inputmode="numeric">
+                    </div>
+                    <div class="editor-input-group">
+                        <label>Gewicht</label>
+                        <input type="number" value="${ex.defaultWeight || ''}" placeholder="0" 
+                               data-field="defaultWeight" data-exercise-id="${ex.id}" inputmode="decimal" step="0.5">
+                    </div>
+                    <div class="editor-input-group">
+                        <label>Reps</label>
+                        <input type="number" value="${ex.defaultReps || ''}" placeholder="10" 
+                               data-field="defaultReps" data-exercise-id="${ex.id}" inputmode="numeric">
+                    </div>
+                </div>
             </div>
         `).join('');
 

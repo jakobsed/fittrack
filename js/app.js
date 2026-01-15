@@ -187,7 +187,18 @@ const App = {
         const exercise = workout.exercises.find(ex => ex.id === exerciseId);
         if (!exercise) return;
 
-        Storage.updateExercise(this.selectedDate, exerciseId, { completed: !exercise.completed });
+        const newCompleted = !exercise.completed;
+        Storage.updateExercise(this.selectedDate, exerciseId, { completed: newCompleted });
+
+        // Sync values back to template when marking as complete
+        if (newCompleted && workout.templateId) {
+            Storage.syncWorkoutToTemplate(workout.templateId, exercise.name, {
+                sets: exercise.sets,
+                weight: exercise.weight,
+                reps: exercise.reps
+            });
+        }
+
         this.renderWeekView();
     },
 
@@ -261,6 +272,16 @@ const App = {
             if (removeBtn) {
                 Storage.removeExerciseFromTemplate(this.editingTemplateId, removeBtn.dataset.exerciseId);
                 this.renderTemplatesView();
+            }
+        });
+
+        // Update exercise defaults in template
+        document.getElementById('editor-exercises-list')?.addEventListener('input', (e) => {
+            if (e.target.matches('.editor-input-group input')) {
+                const exerciseId = e.target.dataset.exerciseId;
+                const field = e.target.dataset.field;
+                const value = e.target.value;
+                Storage.updateExerciseInTemplate(this.editingTemplateId, exerciseId, { [field]: value });
             }
         });
     },
