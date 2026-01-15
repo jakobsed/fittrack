@@ -1229,6 +1229,23 @@ body {
     cursor: pointer;
 }
 
+.editor-save-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background-color: var(--color-accent);
+    border-radius: var(--radius-md);
+    color: var(--color-white);
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.editor-save-btn:hover {
+    background-color: #E85A3A;
+}
+
 .editor-title-input {
     flex: 1;
     padding: var(--spacing-sm);

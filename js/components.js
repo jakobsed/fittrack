@@ -257,6 +257,7 @@ const Components = {
                 <div class="editor-header">
                     <button class="editor-back-btn" id="editor-back">← Zurück</button>
                     <input type="text" class="editor-title-input" id="editor-title" value="${this.escapeHtml(template.name)}">
+                    <button class="editor-save-btn" id="editor-save">✓</button>
                 </div>
                 <div class="editor-exercises-list" id="editor-exercises-list">
                     ${exercisesList || '<p class="editor-empty">Noch keine Übungen in dieser Vorlage.</p>'}

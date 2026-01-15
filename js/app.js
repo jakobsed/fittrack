@@ -219,11 +219,24 @@ const App = {
 
     setupEditorListeners() {
         const backBtn = document.getElementById('editor-back');
+        const saveBtn = document.getElementById('editor-save');
         const titleInput = document.getElementById('editor-title');
         const addBtn = document.getElementById('add-template-exercise-btn');
 
         if (backBtn) {
             backBtn.addEventListener('click', () => {
+                this.editingTemplateId = null;
+                this.renderTemplatesView();
+            });
+        }
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+                // Save and go back
+                const title = titleInput?.value.trim();
+                if (title) {
+                    Storage.updateTemplateName(this.editingTemplateId, title);
+                }
                 this.editingTemplateId = null;
                 this.renderTemplatesView();
             });
