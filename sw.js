@@ -3,16 +3,16 @@
  * Enables offline functionality and caching
  */
 
-const CACHE_NAME = 'fittrack-v1';
+const CACHE_NAME = 'fittrack-v2';
 const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/css/styles.css',
-    '/js/app.js',
-    '/js/storage.js',
-    '/js/components.js',
-    '/assets/icons/icon-192.png',
-    '/assets/icons/icon-512.png'
+    './',
+    './index.html',
+    './css/styles.css',
+    './js/app.js',
+    './js/storage.js',
+    './js/components.js',
+    './assets/icons/icon-192.png',
+    './assets/icons/icon-512.png'
 ];
 
 // Install event - cache assets
@@ -86,7 +86,7 @@ self.addEventListener('fetch', (event) => {
                     .catch(() => {
                         // Offline fallback for HTML pages
                         if (event.request.headers.get('accept').includes('text/html')) {
-                            return caches.match('/index.html');
+                            return caches.match('./index.html');
                         }
                     });
             })
