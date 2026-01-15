@@ -1,40 +1,29 @@
 /**
- * FitTrack - Main Application
+ * FitTrack - Main Application V2
  * Handles app logic, navigation, and event handling
  */
 
 const App = {
-    // Current state
     currentView: 'week',
     currentWeekStart: null,
     selectedDate: null,
     weekDates: [],
+    modalMode: 'workout', // 'workout' or 'database'
 
-    /**
-     * Initialize the application
-     */
     init() {
-        // Set initial date to today
         const today = new Date();
         this.currentWeekStart = this.getMonday(today);
         this.selectedDate = Components.formatDateKey(today);
         this.weekDates = Components.getWeekDates(today);
 
-        // Render initial views
         this.renderWeekView();
+        this.renderExercisesView();
         this.renderStatsView();
-
-        // Setup event listeners
         this.setupEventListeners();
 
-        console.log('FitTrack initialized!');
+        console.log('FitTrack V2 initialized!');
     },
 
-    /**
-     * Get Monday of the week for a given date
-     * @param {Date} date 
-     * @returns {Date}
-     */
     getMonday(date) {
         const d = new Date(date);
         const day = d.getDay();
@@ -43,12 +32,10 @@ const App = {
         return d;
     },
 
-    /**
-     * Setup all event listeners
-     */
     setupEventListeners() {
         // Navigation
         document.getElementById('nav-week').addEventListener('click', () => this.switchView('week'));
+        document.getElementById('nav-exercises').addEventListener('click', () => this.switchView('exercises'));
         document.getElementById('nav-stats').addEventListener('click', () => this.switchView('stats'));
 
         // Week navigation
@@ -63,8 +50,17 @@ const App = {
             }
         });
 
-        // Add exercise button
-        document.getElementById('add-exercise-btn').addEventListener('click', () => this.openExerciseModal());
+        // Add exercise button (workout)
+        document.getElementById('add-exercise-btn').addEventListener('click', () => {
+            this.modalMode = 'workout';
+            this.openExerciseModal();
+        });
+
+        // Add exercise button (database)
+        document.getElementById('add-db-exercise-btn').addEventListener('click', () => {
+            this.modalMode = 'database';
+            this.openExerciseModal();
+        });
 
         // Modal events
         document.getElementById('modal-close').addEventListener('click', () => this.closeExerciseModal());
@@ -76,7 +72,6 @@ const App = {
             }
         });
 
-        // Enter key in exercise name input
         document.getElementById('exercise-name').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.saveExercise();
@@ -88,11 +83,15 @@ const App = {
             this.handleExerciseAction(e);
         });
 
-        // Set input changes (delegated)
         document.getElementById('exercises-list').addEventListener('change', (e) => {
-            if (e.target.classList.contains('set-input')) {
-                this.handleSetInputChange(e);
+            if (e.target.matches('.exercise-input-group input')) {
+                this.handleExerciseInputChange(e);
             }
+        });
+
+        // Exercise database events (delegated)
+        document.getElementById('exercises-database-list').addEventListener('click', (e) => {
+            this.handleDatabaseAction(e);
         });
 
         // Close menus when clicking outside
@@ -105,38 +104,28 @@ const App = {
         });
     },
 
-    /**
-     * Switch between views
-     * @param {string} view - 'week' or 'stats'
-     */
     switchView(view) {
         this.currentView = view;
 
-        // Update nav buttons
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.view === view);
         });
 
-        // Update views
         document.querySelectorAll('.view').forEach(v => {
             v.classList.toggle('active', v.id === `${view}-view`);
         });
 
-        // Refresh stats if switching to stats view
         if (view === 'stats') {
             this.renderStatsView();
+        } else if (view === 'exercises') {
+            this.renderExercisesView();
         }
     },
 
-    /**
-     * Navigate to previous/next week
-     * @param {number} direction - -1 for previous, 1 for next
-     */
     navigateWeek(direction) {
         this.currentWeekStart.setDate(this.currentWeekStart.getDate() + (direction * 7));
         this.weekDates = Components.getWeekDates(this.currentWeekStart);
 
-        // If selected date is not in new week, select first day
         const selectedInWeek = this.weekDates.some(
             d => Components.formatDateKey(d) === this.selectedDate
         );
@@ -147,95 +136,99 @@ const App = {
         this.renderWeekView();
     },
 
-    /**
-     * Select a date
-     * @param {string} dateKey 
-     */
     selectDate(dateKey) {
         this.selectedDate = dateKey;
         this.renderWeekView();
     },
 
-    /**
-     * Render the week view
-     */
     renderWeekView() {
         const workoutDates = Storage.getWorkoutDates();
 
-        // Render week title
         document.getElementById('week-title').textContent =
             Components.renderWeekTitle(this.currentWeekStart);
 
-        // Render week calendar
         document.getElementById('week-calendar').innerHTML =
             Components.renderWeekCalendar(this.weekDates, this.selectedDate, workoutDates);
 
-        // Render day title
         const selectedDateObj = new Date(this.selectedDate);
         document.getElementById('day-title').textContent =
             Components.formatDateDisplay(selectedDateObj);
 
-        // Render exercises for selected day
         const workout = Storage.getWorkout(this.selectedDate);
         document.getElementById('exercises-list').innerHTML =
             Components.renderExercises(workout?.exercises);
     },
 
-    /**
-     * Render the stats view
-     */
+    renderExercisesView() {
+        const exercises = Storage.getExerciseDatabase();
+        document.getElementById('exercises-database-list').innerHTML =
+            Components.renderExerciseDatabase(exercises);
+    },
+
     renderStatsView() {
         const stats = Storage.getStatistics();
         document.getElementById('stats-grid').innerHTML = Components.renderStatsGrid(stats);
+
+        const muscleStats = Storage.getMuscleGroupStats();
+        document.getElementById('muscle-stats-list').innerHTML =
+            Components.renderMuscleStats(muscleStats);
 
         const recentWorkouts = Storage.getRecentWorkouts(5);
         document.getElementById('recent-workouts-list').innerHTML =
             Components.renderRecentWorkouts(recentWorkouts);
     },
 
-    /**
-     * Open the add exercise modal
-     */
     openExerciseModal() {
         document.getElementById('exercise-name').value = '';
+        document.getElementById('exercise-muscle').value = '';
+
+        const title = this.modalMode === 'database'
+            ? 'Übung zur Datenbank hinzufügen'
+            : 'Übung hinzufügen';
+        document.getElementById('modal-title').textContent = title;
+
         document.getElementById('exercise-modal').classList.add('show');
         document.getElementById('exercise-name').focus();
     },
 
-    /**
-     * Close the exercise modal
-     */
     closeExerciseModal() {
         document.getElementById('exercise-modal').classList.remove('show');
     },
 
-    /**
-     * Save new exercise
-     */
     saveExercise() {
         const nameInput = document.getElementById('exercise-name');
+        const muscleSelect = document.getElementById('exercise-muscle');
         const name = nameInput.value.trim();
+        const muscleGroup = muscleSelect.value;
 
         if (!name) {
             nameInput.focus();
             return;
         }
 
-        const exercise = {
-            id: Storage.generateId(),
-            name: name,
-            sets: [{ weight: '', reps: '', completed: false }]
-        };
+        if (this.modalMode === 'database') {
+            // Add to database
+            Storage.addToExerciseDatabase({ name, muscleGroup });
+            this.closeExerciseModal();
+            this.renderExercisesView();
+        } else {
+            // Add to today's workout
+            const exercise = {
+                id: Storage.generateId(),
+                name: name,
+                muscleGroup: muscleGroup,
+                sets: '',
+                weight: '',
+                reps: '',
+                completed: false
+            };
 
-        Storage.addExercise(this.selectedDate, exercise);
-        this.closeExerciseModal();
-        this.renderWeekView();
+            Storage.addExercise(this.selectedDate, exercise);
+            this.closeExerciseModal();
+            this.renderWeekView();
+        }
     },
 
-    /**
-     * Handle exercise-related actions
-     * @param {Event} e 
-     */
     handleExerciseAction(e) {
         const action = e.target.closest('[data-action]')?.dataset.action;
         const exerciseId = e.target.closest('[data-exercise-id]')?.dataset.exerciseId;
@@ -249,22 +242,23 @@ const App = {
             case 'delete':
                 this.deleteExercise(exerciseId);
                 break;
-            case 'add-set':
-                this.addSet(exerciseId);
-                break;
-            case 'complete-set':
-                const setIndex = parseInt(e.target.closest('[data-set-index]').dataset.setIndex);
-                this.toggleSetComplete(exerciseId, setIndex);
+            case 'complete':
+                this.toggleExerciseComplete(exerciseId);
                 break;
         }
     },
 
-    /**
-     * Toggle exercise menu visibility
-     * @param {string} exerciseId 
-     */
+    handleDatabaseAction(e) {
+        const action = e.target.closest('[data-action]')?.dataset.action;
+        const exerciseId = e.target.closest('[data-exercise-id]')?.dataset.exerciseId;
+
+        if (action === 'delete-db' && exerciseId) {
+            Storage.deleteFromExerciseDatabase(exerciseId);
+            this.renderExercisesView();
+        }
+    },
+
     toggleExerciseMenu(exerciseId) {
-        // Close all other menus first
         document.querySelectorAll('.exercise-menu.show').forEach(menu => {
             if (menu.id !== `menu-${exerciseId}`) {
                 menu.classList.remove('show');
@@ -275,42 +269,25 @@ const App = {
         menu.classList.toggle('show');
     },
 
-    /**
-     * Delete an exercise
-     * @param {string} exerciseId 
-     */
     deleteExercise(exerciseId) {
         Storage.deleteExercise(this.selectedDate, exerciseId);
         this.renderWeekView();
     },
 
-    /**
-     * Add a new set to an exercise
-     * @param {string} exerciseId 
-     */
-    addSet(exerciseId) {
+    toggleExerciseComplete(exerciseId) {
         const workout = Storage.getWorkout(this.selectedDate);
         if (!workout) return;
 
         const exercise = workout.exercises.find(ex => ex.id === exerciseId);
         if (!exercise) return;
 
-        if (!exercise.sets) {
-            exercise.sets = [];
-        }
-        exercise.sets.push({ weight: '', reps: '', completed: false });
-
-        Storage.updateExercise(this.selectedDate, exerciseId, { sets: exercise.sets });
+        exercise.completed = !exercise.completed;
+        Storage.updateExercise(this.selectedDate, exerciseId, { completed: exercise.completed });
         this.renderWeekView();
     },
 
-    /**
-     * Handle set input change
-     * @param {Event} e 
-     */
-    handleSetInputChange(e) {
+    handleExerciseInputChange(e) {
         const exerciseId = e.target.dataset.exerciseId;
-        const setIndex = parseInt(e.target.dataset.setIndex);
         const field = e.target.dataset.field;
         const value = e.target.value;
 
@@ -318,31 +295,13 @@ const App = {
         if (!workout) return;
 
         const exercise = workout.exercises.find(ex => ex.id === exerciseId);
-        if (!exercise || !exercise.sets[setIndex]) return;
+        if (!exercise) return;
 
-        exercise.sets[setIndex][field] = value;
-        Storage.updateExercise(this.selectedDate, exerciseId, { sets: exercise.sets });
-    },
-
-    /**
-     * Toggle set completion
-     * @param {string} exerciseId 
-     * @param {number} setIndex 
-     */
-    toggleSetComplete(exerciseId, setIndex) {
-        const workout = Storage.getWorkout(this.selectedDate);
-        if (!workout) return;
-
-        const exercise = workout.exercises.find(ex => ex.id === exerciseId);
-        if (!exercise || !exercise.sets[setIndex]) return;
-
-        exercise.sets[setIndex].completed = !exercise.sets[setIndex].completed;
-        Storage.updateExercise(this.selectedDate, exerciseId, { sets: exercise.sets });
-        this.renderWeekView();
+        exercise[field] = value;
+        Storage.updateExercise(this.selectedDate, exerciseId, { [field]: value });
     }
 };
 
-// Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     App.init();
 });

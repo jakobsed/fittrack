@@ -1,32 +1,15 @@
 /**
- * FitTrack - UI Components Module
+ * FitTrack - UI Components Module V2
  * Reusable UI component generators
  */
 
 const Components = {
-    /**
-     * German day names (short)
-     */
     dayNames: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
-
-    /**
-     * German day names (full)
-     */
     dayNamesFull: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
+    monthNames: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
 
-    /**
-     * German month names
-     */
-    monthNames: [
-        'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-        'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
-    ],
+    muscleGroups: ['Brust', 'Rücken', 'Schultern', 'Bizeps', 'Trizeps', 'Beine', 'Core', 'Andere'],
 
-    /**
-     * Format date to YYYY-MM-DD
-     * @param {Date} date 
-     * @returns {string}
-     */
     formatDateKey(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -34,39 +17,23 @@ const Components = {
         return `${year}-${month}-${day}`;
     },
 
-    /**
-     * Format date for display
-     * @param {Date} date 
-     * @returns {string}
-     */
     formatDateDisplay(date) {
-        const dayIndex = (date.getDay() + 6) % 7; // Adjust for Monday start
+        const dayIndex = (date.getDay() + 6) % 7;
         const dayName = this.dayNamesFull[dayIndex];
         const day = date.getDate();
         const month = this.monthNames[date.getMonth()];
         return `${dayName}, ${day}. ${month}`;
     },
 
-    /**
-     * Get week number
-     * @param {Date} date 
-     * @returns {number}
-     */
     getWeekNumber(date) {
         const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
         const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
         return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
     },
 
-    /**
-     * Get dates for a week (Monday to Sunday)
-     * @param {Date} referenceDate - Any date in the desired week
-     * @returns {Date[]} Array of 7 dates
-     */
     getWeekDates(referenceDate) {
         const dates = [];
         const day = referenceDate.getDay();
-        // Adjust to get Monday (day 0 = Sunday, so we adjust)
         const diff = day === 0 ? -6 : 1 - day;
         const monday = new Date(referenceDate);
         monday.setDate(referenceDate.getDate() + diff);
@@ -79,13 +46,6 @@ const Components = {
         return dates;
     },
 
-    /**
-     * Render week calendar
-     * @param {Date[]} weekDates - Array of week dates
-     * @param {string} selectedDateKey - Currently selected date key
-     * @param {string[]} workoutDates - Dates that have workouts
-     * @returns {string} HTML string
-     */
     renderWeekCalendar(weekDates, selectedDateKey, workoutDates) {
         const today = this.formatDateKey(new Date());
 
@@ -109,11 +69,6 @@ const Components = {
         }).join('');
     },
 
-    /**
-     * Render week title
-     * @param {Date} referenceDate 
-     * @returns {string}
-     */
     renderWeekTitle(referenceDate) {
         const month = this.monthNames[referenceDate.getMonth()];
         const year = referenceDate.getFullYear();
@@ -121,11 +76,7 @@ const Components = {
         return `${month} ${year} - Woche ${weekNum}`;
     },
 
-    /**
-     * Render exercises list
-     * @param {Array} exercises 
-     * @returns {string} HTML string
-     */
+    // V2: Simplified exercise rendering
     renderExercises(exercises) {
         if (!exercises || exercises.length === 0) {
             return `
@@ -139,18 +90,17 @@ const Components = {
         return exercises.map(exercise => this.renderExerciseCard(exercise)).join('');
     },
 
-    /**
-     * Render single exercise card
-     * @param {Object} exercise 
-     * @returns {string} HTML string
-     */
+    // V2: Simplified exercise card with sets/weight/reps
     renderExerciseCard(exercise) {
-        const sets = exercise.sets || [];
+        const completedClass = exercise.completed ? 'completed' : '';
+        const muscleTag = exercise.muscleGroup
+            ? `<span class="exercise-muscle-tag">${this.escapeHtml(exercise.muscleGroup)}</span>`
+            : '';
 
         return `
             <div class="exercise-card" data-exercise-id="${exercise.id}">
                 <div class="exercise-header">
-                    <span class="exercise-name">${this.escapeHtml(exercise.name)}</span>
+                    <span class="exercise-name">${this.escapeHtml(exercise.name)}${muscleTag}</span>
                     <div style="position: relative;">
                         <button class="exercise-menu-btn" data-action="menu" data-exercise-id="${exercise.id}">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -166,91 +116,100 @@ const Components = {
                         </div>
                     </div>
                 </div>
-                <div class="sets-container">
-                    <div class="sets-header">
-                        <span>Set</span>
-                        <span>kg</span>
-                        <span>Reps</span>
-                        <span></span>
+                <div class="exercise-inputs">
+                    <div class="exercise-input-group">
+                        <label>Sets</label>
+                        <input type="number" 
+                               value="${exercise.sets || ''}" 
+                               placeholder="0"
+                               data-field="sets"
+                               data-exercise-id="${exercise.id}"
+                               inputmode="numeric">
                     </div>
-                    <div class="sets-list" data-exercise-id="${exercise.id}">
-                        ${this.renderSets(exercise.id, sets)}
+                    <div class="exercise-input-group">
+                        <label>Gewicht (kg)</label>
+                        <input type="number" 
+                               value="${exercise.weight || ''}" 
+                               placeholder="0"
+                               data-field="weight"
+                               data-exercise-id="${exercise.id}"
+                               inputmode="decimal"
+                               step="0.5">
                     </div>
-                    <button class="add-set-btn" data-action="add-set" data-exercise-id="${exercise.id}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Set hinzufügen
-                    </button>
+                    <div class="exercise-input-group">
+                        <label>Reps</label>
+                        <input type="number" 
+                               value="${exercise.reps || ''}" 
+                               placeholder="0"
+                               data-field="reps"
+                               data-exercise-id="${exercise.id}"
+                               inputmode="numeric">
+                    </div>
                 </div>
-            </div>
-        `;
-    },
-
-    /**
-     * Render sets for an exercise
-     * @param {string} exerciseId 
-     * @param {Array} sets 
-     * @returns {string} HTML string
-     */
-    renderSets(exerciseId, sets) {
-        if (sets.length === 0) {
-            // Add one empty set by default
-            return this.renderSetRow(exerciseId, 0, { weight: '', reps: '', completed: false });
-        }
-
-        return sets.map((set, index) => this.renderSetRow(exerciseId, index, set)).join('');
-    },
-
-    /**
-     * Render single set row
-     * @param {string} exerciseId 
-     * @param {number} index 
-     * @param {Object} set 
-     * @returns {string} HTML string
-     */
-    renderSetRow(exerciseId, index, set) {
-        const completedClass = set.completed ? 'completed' : '';
-        const checkIcon = set.completed
-            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>'
-            : '';
-
-        return `
-            <div class="set-row ${completedClass}" data-set-index="${index}">
-                <span class="set-number">${index + 1}</span>
-                <input type="number" 
-                       class="set-input" 
-                       placeholder="kg" 
-                       value="${set.weight || ''}" 
-                       data-field="weight"
-                       data-exercise-id="${exerciseId}"
-                       data-set-index="${index}"
-                       inputmode="decimal"
-                       step="0.5">
-                <input type="number" 
-                       class="set-input" 
-                       placeholder="reps" 
-                       value="${set.reps || ''}" 
-                       data-field="reps"
-                       data-exercise-id="${exerciseId}"
-                       data-set-index="${index}"
-                       inputmode="numeric">
-                <button class="set-complete-btn ${completedClass}" 
-                        data-action="complete-set"
-                        data-exercise-id="${exerciseId}"
-                        data-set-index="${index}">
-                    ${checkIcon}
+                <button class="exercise-complete-btn ${completedClass}" 
+                        data-action="complete" 
+                        data-exercise-id="${exercise.id}">
+                    ${exercise.completed ? '✓ Erledigt' : 'Als erledigt markieren'}
                 </button>
             </div>
         `;
     },
 
-    /**
-     * Render statistics cards
-     * @param {Object} stats 
-     * @returns {string} HTML string
-     */
+    // V2: Exercise database list
+    renderExerciseDatabase(exercises) {
+        if (!exercises || exercises.length === 0) {
+            return `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📚</div>
+                    <p class="empty-state-text">Noch keine Übungen in der Datenbank.</p>
+                </div>
+            `;
+        }
+
+        return exercises.map(exercise => `
+            <div class="db-exercise-card" data-exercise-id="${exercise.id}">
+                <div class="db-exercise-info">
+                    <span class="db-exercise-name">${this.escapeHtml(exercise.name)}</span>
+                    ${exercise.muscleGroup ? `<span class="db-exercise-muscle">${this.escapeHtml(exercise.muscleGroup)}</span>` : ''}
+                </div>
+                <button class="db-exercise-delete" data-action="delete-db" data-exercise-id="${exercise.id}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        `).join('');
+    },
+
+    // V2: Muscle group statistics bars
+    renderMuscleStats(muscleStats) {
+        const groups = Object.keys(muscleStats);
+        if (groups.length === 0) {
+            return `
+                <div class="empty-state" style="padding: 1rem;">
+                    <p class="empty-state-text">Noch keine Daten vorhanden.</p>
+                </div>
+            `;
+        }
+
+        const maxSets = Math.max(...Object.values(muscleStats), 1);
+
+        return groups.map(group => {
+            const sets = muscleStats[group];
+            const percentage = (sets / maxSets) * 100;
+            return `
+                <div class="muscle-stat-row">
+                    <span class="muscle-stat-label">${this.escapeHtml(group)}</span>
+                    <div class="muscle-stat-bar-container">
+                        <div class="muscle-stat-bar" style="width: ${percentage}%"></div>
+                    </div>
+                    <span class="muscle-stat-value">${sets}</span>
+                </div>
+            `;
+        }).join('');
+    },
+
     renderStatsGrid(stats) {
         return `
             <div class="stat-card">
@@ -272,11 +231,6 @@ const Components = {
         `;
     },
 
-    /**
-     * Format volume number
-     * @param {number} volume 
-     * @returns {string}
-     */
     formatVolume(volume) {
         if (volume >= 1000000) {
             return (volume / 1000000).toFixed(1) + 'M';
@@ -287,11 +241,6 @@ const Components = {
         return volume.toString();
     },
 
-    /**
-     * Render recent workouts list
-     * @param {Array} workouts 
-     * @returns {string} HTML string
-     */
     renderRecentWorkouts(workouts) {
         if (workouts.length === 0) {
             return `
@@ -306,7 +255,7 @@ const Components = {
             const dateDisplay = this.formatDateDisplay(date);
             const exerciseCount = workout.exercises ? workout.exercises.length : 0;
             const setCount = workout.exercises
-                ? workout.exercises.reduce((sum, ex) => sum + (ex.sets ? ex.sets.filter(s => s.completed).length : 0), 0)
+                ? workout.exercises.reduce((sum, ex) => sum + (ex.completed ? (parseInt(ex.sets) || 0) : 0), 0)
                 : 0;
 
             return `
@@ -318,11 +267,6 @@ const Components = {
         }).join('');
     },
 
-    /**
-     * Escape HTML to prevent XSS
-     * @param {string} text 
-     * @returns {string}
-     */
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;

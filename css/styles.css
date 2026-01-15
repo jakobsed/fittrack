@@ -1,19 +1,23 @@
 /* ============================================
    FitTrack - Fitness App Styles
-   Design inspired by Jeff Nippard App
+   V2: Black/White design with orange accents
    ============================================ */
 
 /* CSS Variables */
 :root {
-    /* Colors */
-    --color-primary: #FF6B4A;
-    --color-primary-light: #FF8A6F;
-    --color-primary-dark: #E55A3A;
-    
+    /* Colors - Black primary, Orange accent */
+    --color-primary: #1A1A1A;
+    --color-primary-light: #333333;
+    --color-primary-dark: #000000;
+
+    /* Accent color for highlights */
+    --color-accent: #FF6B4A;
+    --color-accent-light: #FF8A6F;
+
     --color-bg: #F8F9FA;
     --color-white: #FFFFFF;
     --color-black: #1A1A1A;
-    
+
     --color-gray-100: #F3F4F6;
     --color-gray-200: #E5E7EB;
     --color-gray-300: #D1D5DB;
@@ -21,14 +25,14 @@
     --color-gray-500: #6B7280;
     --color-gray-600: #4B5563;
     --color-gray-700: #374151;
-    
+
     --color-success: #10B981;
     --color-warning: #F59E0B;
     --color-error: #EF4444;
-    
+
     /* Typography */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    
+
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
     --font-size-base: 1rem;
@@ -36,7 +40,7 @@
     --font-size-xl: 1.25rem;
     --font-size-2xl: 1.5rem;
     --font-size-3xl: 1.875rem;
-    
+
     /* Spacing */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
@@ -44,19 +48,19 @@
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
     --spacing-2xl: 3rem;
-    
+
     /* Border Radius */
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
     --radius-full: 9999px;
-    
+
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    
+
     /* Transitions */
     --transition-fast: 150ms ease;
     --transition-base: 200ms ease;
@@ -67,7 +71,9 @@
    Base Styles
    ============================================ */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -185,8 +191,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .section-title {
@@ -273,7 +286,7 @@ body {
     content: '';
     width: 6px;
     height: 6px;
-    background-color: var(--color-primary);
+    background-color: var(--color-accent);
     border-radius: var(--radius-full);
     margin-top: var(--spacing-xs);
 }
@@ -283,7 +296,7 @@ body {
 }
 
 .day-card.today {
-    border-color: var(--color-primary);
+    border-color: var(--color-accent);
 }
 
 .day-name {
@@ -449,7 +462,7 @@ body {
 }
 
 .set-row.completed .set-number {
-    background-color: var(--color-primary);
+    background-color: var(--color-accent);
     color: var(--color-white);
 }
 
@@ -466,7 +479,7 @@ body {
 
 .set-input:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.1);
 }
 
@@ -489,13 +502,13 @@ body {
 }
 
 .set-complete-btn:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
 }
 
 .set-complete-btn.completed {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
     color: var(--color-white);
 }
 
@@ -518,9 +531,9 @@ body {
 }
 
 .add-set-btn:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background-color: rgba(255, 107, 74, 0.05);
+    border-color: var(--color-black);
+    color: var(--color-black);
+    background-color: var(--color-gray-100);
 }
 
 /* ============================================
@@ -545,9 +558,9 @@ body {
 }
 
 .add-exercise-btn:hover {
-    border-color: var(--color-primary);
-    background-color: rgba(255, 107, 74, 0.05);
-    color: var(--color-primary);
+    border-color: var(--color-black);
+    background-color: var(--color-gray-200);
+    color: var(--color-black);
 }
 
 /* ============================================
@@ -572,7 +585,7 @@ body {
 .stat-value {
     font-size: var(--font-size-3xl);
     font-weight: 700;
-    color: var(--color-primary);
+    color: var(--color-accent);
     line-height: 1;
     margin-bottom: var(--spacing-xs);
 }
@@ -740,7 +753,7 @@ body {
 
 .form-group input:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.1);
 }
 
@@ -795,4 +808,221 @@ body {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* ============================================
+   V2: Form Select
+   ============================================ */
+
+.form-select {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-family: var(--font-family);
+    background-color: var(--color-white);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.1);
+}
+
+/* ============================================
+   V2: Muscle Group Stats
+   ============================================ */
+
+.muscle-stats-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.muscle-stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.muscle-stat-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.muscle-stat-label {
+    width: 80px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-gray-700);
+}
+
+.muscle-stat-bar-container {
+    flex: 1;
+    height: 24px;
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.muscle-stat-bar {
+    height: 100%;
+    background-color: var(--color-accent);
+    border-radius: var(--radius-md);
+    transition: width var(--transition-slow);
+}
+
+.muscle-stat-value {
+    width: 40px;
+    text-align: right;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-black);
+}
+
+/* ============================================
+   V2: Exercise Database
+   ============================================ */
+
+.exercises-database-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.db-exercise-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+}
+
+.db-exercise-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.db-exercise-name {
+    font-weight: 600;
+    color: var(--color-black);
+}
+
+.db-exercise-muscle {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-600);
+}
+
+.db-exercise-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background-color: transparent;
+    border-radius: var(--radius-md);
+    color: var(--color-gray-400);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.db-exercise-delete:hover {
+    background-color: var(--color-error);
+    color: var(--color-white);
+}
+
+/* ============================================
+   V2: Simplified Exercise Entry
+   ============================================ */
+
+.exercise-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+}
+
+.exercise-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.exercise-input-group label {
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--color-gray-500);
+    text-transform: uppercase;
+}
+
+.exercise-input-group input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-lg);
+    font-family: var(--font-family);
+    text-align: center;
+    font-weight: 600;
+}
+
+.exercise-input-group input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.1);
+}
+
+.exercise-complete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    padding: var(--spacing-md);
+    margin: var(--spacing-md);
+    margin-top: 0;
+    border: none;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    font-family: var(--font-family);
+    color: var(--color-white);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.exercise-complete-btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.exercise-complete-btn.completed {
+    background-color: var(--color-accent);
+}
+
+.exercise-muscle-tag {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-left: var(--spacing-sm);
+    background-color: var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--color-gray-600);
 }

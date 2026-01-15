@@ -47,6 +47,12 @@
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
                 </button>
+                <button class="nav-btn" data-view="exercises" id="nav-exercises">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </button>
                 <button class="nav-btn" data-view="stats" id="nav-stats">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -101,9 +107,34 @@
                 </div>
             </section>
 
+            <!-- Exercises Database View -->
+            <section id="exercises-view" class="view">
+                <h2 class="section-title">Meine Übungen</h2>
+
+                <div class="exercises-database-list" id="exercises-database-list">
+                    <!-- Exercises will be rendered by JavaScript -->
+                </div>
+
+                <button class="add-exercise-btn" id="add-db-exercise-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Übung zur Datenbank hinzufügen
+                </button>
+            </section>
+
             <!-- Stats View -->
             <section id="stats-view" class="view">
                 <h2 class="section-title">Statistiken</h2>
+
+                <!-- Muscle Group Stats -->
+                <div class="muscle-stats-section">
+                    <h3 class="subsection-title">Sets pro Muskelgruppe</h3>
+                    <div class="muscle-stats-list" id="muscle-stats-list">
+                        <!-- Muscle group stats will be rendered by JavaScript -->
+                    </div>
+                </div>
 
                 <div class="stats-grid" id="stats-grid">
                     <!-- Stats cards will be rendered by JavaScript -->
@@ -119,7 +150,7 @@
         </main>
     </div>
 
-    <!-- Add Exercise Modal -->
+    <!-- Add Exercise Modal (for workout tracking) -->
     <div class="modal-overlay" id="exercise-modal">
         <div class="modal">
             <div class="modal-header">
@@ -135,6 +166,20 @@
                 <div class="form-group">
                     <label for="exercise-name">Übungsname</label>
                     <input type="text" id="exercise-name" placeholder="z.B. Bench Press" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="exercise-muscle">Muskelgruppe</label>
+                    <select id="exercise-muscle" class="form-select">
+                        <option value="">-- Auswählen --</option>
+                        <option value="Brust">Brust</option>
+                        <option value="Rücken">Rücken</option>
+                        <option value="Schultern">Schultern</option>
+                        <option value="Bizeps">Bizeps</option>
+                        <option value="Trizeps">Trizeps</option>
+                        <option value="Beine">Beine</option>
+                        <option value="Core">Core</option>
+                        <option value="Andere">Andere</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
