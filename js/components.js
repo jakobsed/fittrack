@@ -283,7 +283,7 @@ const Components = {
     // Workout Templates (Database Page)
     // ==========================================
 
-    renderTemplatesList(templates) {
+    renderTemplatesList(templates, activeFilter = 'all') {
         if (!templates || templates.length === 0) {
             return `
                 <div class="empty-state">
@@ -293,12 +293,33 @@ const Components = {
             `;
         }
 
-        return templates.map(template => `
+        // Get unique categories
+        const categories = [...new Set(templates.map(t => t.category).filter(Boolean))];
+
+        // Filter chips HTML
+        const filterChipsHtml = categories.length > 0 ? `
+            <div class="filter-chips-container template-filter">
+                <div class="filter-chips">
+                    <button class="filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-template-filter="all">Alle</button>
+                    ${categories.map(cat => `
+                        <button class="filter-chip ${activeFilter === cat ? 'active' : ''}" data-template-filter="${this.escapeHtml(cat)}">${this.escapeHtml(cat)}</button>
+                    `).join('')}
+                </div>
+            </div>
+        ` : '';
+
+        // Filter templates
+        const filteredTemplates = activeFilter === 'all'
+            ? templates
+            : templates.filter(t => t.category === activeFilter);
+
+        const templatesHtml = filteredTemplates.map(template => `
             <div class="template-card" data-template-id="${template.id}">
                 <div class="template-card-header">
                     <span class="template-card-name">${this.escapeHtml(template.name)}</span>
                     <span class="template-card-count">${template.exercises?.length || 0} Übungen</span>
                 </div>
+                ${template.category ? `<span class="template-category-tag">${this.escapeHtml(template.category)}</span>` : ''}
                 <div class="template-card-exercises">
                     ${(template.exercises || []).slice(0, 3).map(ex =>
             `<span class="template-exercise-tag">${this.escapeHtml(ex.name)}</span>`
@@ -311,6 +332,8 @@ const Components = {
                 </div>
             </div>
         `).join('');
+
+        return filterChipsHtml + templatesHtml;
     },
 
     renderTemplateEditor(template) {
@@ -362,6 +385,18 @@ const Components = {
                     <button class="editor-back-btn" id="editor-back">← Zurück</button>
                     <input type="text" class="editor-title-input" id="editor-title" value="${this.escapeHtml(template.name)}">
                     <button class="editor-save-btn" id="editor-save">✓</button>
+                </div>
+                <div class="editor-category-row">
+                    <label>Kategorie:</label>
+                    <select id="editor-category" class="editor-category-select">
+                        <option value="" ${!template.category ? 'selected' : ''}>-- Keine --</option>
+                        <option value="Push" ${template.category === 'Push' ? 'selected' : ''}>Push</option>
+                        <option value="Pull" ${template.category === 'Pull' ? 'selected' : ''}>Pull</option>
+                        <option value="Legs" ${template.category === 'Legs' ? 'selected' : ''}>Legs</option>
+                        <option value="Upper" ${template.category === 'Upper' ? 'selected' : ''}>Upper Body</option>
+                        <option value="Lower" ${template.category === 'Lower' ? 'selected' : ''}>Lower Body</option>
+                        <option value="Full" ${template.category === 'Full' ? 'selected' : ''}>Full Body</option>
+                    </select>
                 </div>
                 <div class="editor-exercises-list" id="editor-exercises-list">
                     ${exercisesList || '<p class="editor-empty">Noch keine Übungen in dieser Vorlage.</p>'}

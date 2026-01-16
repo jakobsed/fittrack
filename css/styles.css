@@ -1483,6 +1483,45 @@ body {
     font-family: var(--font-family);
 }
 
+/* Editor Category Selector */
+.editor-category-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.editor-category-row label {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+.editor-category-select {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    background-color: var(--color-white);
+}
+
+/* Template Category Tag */
+.template-category-tag {
+    display: inline-block;
+    padding: 2px var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-full);
+}
+
+/* Template filter spacing */
+.template-filter {
+    margin-bottom: var(--spacing-md);
+}
+
 .editor-title-input:focus {
     outline: none;
     border-color: var(--color-accent);

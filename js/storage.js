@@ -111,6 +111,7 @@ const Storage = {
         const template = {
             id: this.generateId(),
             name: name,
+            category: '',
             exercises: []
         };
         data.workoutTemplates.push(template);
@@ -126,6 +127,18 @@ const Storage = {
         const template = data.workoutTemplates?.find(t => t.id === templateId);
         if (template) {
             template.name = name;
+            this.saveData(data);
+        }
+    },
+
+    /**
+     * Update template category
+     */
+    updateTemplateCategory(templateId, category) {
+        const data = this.getData();
+        const template = data.workoutTemplates?.find(t => t.id === templateId);
+        if (template) {
+            template.category = category;
             this.saveData(data);
         }
     },

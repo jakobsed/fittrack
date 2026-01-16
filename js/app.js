@@ -240,7 +240,17 @@ const App = {
             }
         }
 
-        document.getElementById('templates-content').innerHTML = Components.renderTemplatesList(templates);
+        document.getElementById('templates-content').innerHTML =
+            Components.renderTemplatesList(templates, this.templateFilter || 'all');
+
+        // Template filter chip clicks
+        document.getElementById('templates-content')?.addEventListener('click', (e) => {
+            const filterChip = e.target.closest('[data-template-filter]');
+            if (filterChip) {
+                this.templateFilter = filterChip.dataset.templateFilter;
+                this.renderTemplatesView();
+            }
+        });
     },
 
     setupFavoritesListeners() {
@@ -314,6 +324,14 @@ const App = {
         if (titleInput) {
             titleInput.addEventListener('change', () => {
                 Storage.updateTemplateName(this.editingTemplateId, titleInput.value.trim());
+            });
+        }
+
+        // Category selector
+        const categorySelect = document.getElementById('editor-category');
+        if (categorySelect) {
+            categorySelect.addEventListener('change', () => {
+                Storage.updateTemplateCategory(this.editingTemplateId, categorySelect.value);
             });
         }
 
