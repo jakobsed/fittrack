@@ -8,7 +8,7 @@ const Components = {
     dayNamesFull: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
     monthNames: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
 
-    muscleGroups: ['Brust', 'Rücken', 'Schultern', 'Bizeps', 'Trizeps', 'Beine', 'Core', 'Andere'],
+    muscleGroups: ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Forearms', 'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Abs'],
 
     formatDateKey(date) {
         const year = date.getFullYear();
@@ -322,18 +322,17 @@ const Components = {
     },
 
     renderMuscleStats(muscleStats) {
-        const groups = Object.keys(muscleStats);
-        if (groups.length === 0) {
-            return `<div class="empty-state" style="padding: 1rem;"><p class="empty-state-text">Noch keine Daten.</p></div>`;
-        }
+        // Show all muscle groups, even if 0 sets
+        const allGroups = this.muscleGroups;
+        const maxScale = 20; // High end reference (like in the image)
 
-        const maxSets = Math.max(...Object.values(muscleStats), 1);
+        return allGroups.map(group => {
+            const sets = muscleStats[group] || 0;
+            const percentage = Math.min((sets / maxScale) * 100, 100);
+            const isLow = sets < 10;
 
-        return groups.map(group => {
-            const sets = muscleStats[group];
-            const percentage = (sets / maxSets) * 100;
             return `
-                <div class="muscle-stat-row">
+                <div class="muscle-stat-row ${isLow ? 'low' : ''}">
                     <span class="muscle-stat-label">${this.escapeHtml(group)}</span>
                     <div class="muscle-stat-bar-container">
                         <div class="muscle-stat-bar" style="width: ${percentage}%"></div>

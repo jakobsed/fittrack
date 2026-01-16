@@ -313,15 +313,8 @@ const App = {
     // ==========================================
 
     renderStatsView() {
-        const stats = Storage.getStatistics();
         const muscleStats = Storage.getMuscleGroupStats();
-        const volumeHistory = Storage.getVolumeHistory();
-        const recentWorkouts = Storage.getRecentWorkouts(5);
-
-        document.getElementById('volume-chart').innerHTML = Components.renderVolumeChart(volumeHistory);
-        document.getElementById('stats-grid').innerHTML = Components.renderStatsGrid(stats);
         document.getElementById('muscle-stats-list').innerHTML = Components.renderMuscleStats(muscleStats);
-        document.getElementById('recent-workouts-list').innerHTML = Components.renderRecentWorkouts(recentWorkouts);
     },
 
     // ==========================================

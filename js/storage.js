@@ -303,24 +303,42 @@ const Storage = {
     },
 
     /**
-     * Get sets per muscle group
+     * Get sets per muscle group for the current week
      */
     getMuscleGroupStats() {
         const data = this.getData();
         const workouts = data.workouts;
         const muscleStats = {};
 
-        Object.values(workouts).forEach(workout => {
-            if (workout.exercises) {
-                workout.exercises.forEach(exercise => {
-                    if (exercise.completed && exercise.muscleGroup) {
-                        const sets = parseInt(exercise.sets) || 0;
-                        if (!muscleStats[exercise.muscleGroup]) {
-                            muscleStats[exercise.muscleGroup] = 0;
+        // Get start of current week (Monday)
+        const today = new Date();
+        const day = today.getDay();
+        const diff = day === 0 ? -6 : 1 - day;
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() + diff);
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        // Get end of week (Sunday)
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        Object.entries(workouts).forEach(([dateKey, workout]) => {
+            const workoutDate = new Date(dateKey);
+
+            // Only count workouts from this week
+            if (workoutDate >= startOfWeek && workoutDate <= endOfWeek) {
+                if (workout.exercises) {
+                    workout.exercises.forEach(exercise => {
+                        if (exercise.completed && exercise.muscleGroup) {
+                            const sets = parseInt(exercise.sets) || 0;
+                            if (!muscleStats[exercise.muscleGroup]) {
+                                muscleStats[exercise.muscleGroup] = 0;
+                            }
+                            muscleStats[exercise.muscleGroup] += sets;
                         }
-                        muscleStats[exercise.muscleGroup] += sets;
-                    }
-                });
+                    });
+                }
             }
         });
 
