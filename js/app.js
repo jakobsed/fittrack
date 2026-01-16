@@ -412,7 +412,6 @@ const App = {
 
         const action = target.dataset.action;
         const templateId = target.dataset.templateId;
-
         if (action === 'edit') {
             this.editingTemplateId = templateId;
             this.renderTemplatesView();
@@ -423,10 +422,9 @@ const App = {
     },
 
     createNewTemplate() {
-        const template = Storage.createTemplate('Neues Workout');
-        this.editingTemplateId = template.id;
-        this.isNewTemplate = true; // Flag for back button to delete if cancelled
-        this.renderTemplatesView();
+        // Open modal for template name and category
+        this.modalMode = 'new-template';
+        this.openModal('Neue Vorlage erstellen');
     },
 
     // ==========================================
@@ -446,6 +444,34 @@ const App = {
         document.getElementById('exercise-name').value = '';
         document.getElementById('exercise-muscle').value = '';
         document.getElementById('modal-title').textContent = title;
+
+        // Show category dropdown for new-template mode, muscle dropdown otherwise
+        const muscleLabel = document.querySelector('label[for="exercise-muscle"]');
+        const muscleSelect = document.getElementById('exercise-muscle');
+
+        if (this.modalMode === 'new-template') {
+            // Change dropdown to category options
+            muscleLabel.textContent = 'Kategorie';
+            muscleSelect.innerHTML = `
+                <option value="">-- Keine --</option>
+                <option value="Chest & Back">Chest & Back</option>
+                <option value="Leg Day">Leg Day</option>
+                <option value="Shoulders & Arms">Shoulders & Arms</option>
+            `;
+        } else {
+            // Reset to muscle groups
+            muscleLabel.textContent = 'Muskelgruppe';
+            muscleSelect.innerHTML = `
+                <option value="">Muskelgruppe wählen</option>
+                <option value="Chest">Chest</option>
+                <option value="Back">Back</option>
+                <option value="Shoulders">Shoulders</option>
+                <option value="Biceps">Biceps</option>
+                <option value="Triceps">Triceps</option>
+                <option value="Legs">Legs</option>
+                <option value="Core">Core</option>
+            `;
+        }
 
         // Inject favorites picker if in template mode
         const pickerContainer = document.getElementById('favorites-picker-container');
@@ -501,7 +527,14 @@ const App = {
             return;
         }
 
-        if (this.modalMode === 'favorite') {
+        if (this.modalMode === 'new-template') {
+            // Create new template with name and category
+            const template = Storage.createTemplate(name);
+            Storage.updateTemplateCategory(template.id, muscleGroup); // muscleGroup is actually category here
+            this.editingTemplateId = template.id;
+            this.closeModal();
+            this.renderTemplatesView();
+        } else if (this.modalMode === 'favorite') {
             // Add to favorites
             Storage.addFavoriteExercise(name, muscleGroup);
             this.closeModal();

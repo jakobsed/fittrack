@@ -80,7 +80,7 @@ const Components = {
     // Workout Template Selection (Home Page)
     // ==========================================
 
-    renderTemplateSelection(templates, hasWorkout, activeFilter = 'all') {
+    renderTemplateSelection(templates, hasWorkout, activeFilter = null) {
         if (hasWorkout) {
             return ''; // Don't show if workout already exists
         }
@@ -103,11 +103,10 @@ const Components = {
         // Get unique categories
         const categories = [...new Set(templates.map(t => t.category).filter(Boolean))];
 
-        // Filter chips HTML
+        // Filter chips HTML - no "Alle" button
         const filterChipsHtml = categories.length > 0 ? `
             <div class="filter-chips-container home-filter">
                 <div class="filter-chips">
-                    <button class="filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-home-filter="all">Alle</button>
                     ${categories.map(cat => `
                         <button class="filter-chip ${activeFilter === cat ? 'active' : ''}" data-home-filter="${this.escapeHtml(cat)}">${this.escapeHtml(cat)}</button>
                     `).join('')}
@@ -115,8 +114,8 @@ const Components = {
             </div>
         ` : '';
 
-        // Filter templates
-        const filteredTemplates = activeFilter === 'all'
+        // Filter templates (null = show all)
+        const filteredTemplates = !activeFilter
             ? templates
             : templates.filter(t => t.category === activeFilter);
 
@@ -228,24 +227,23 @@ const Components = {
     // Favorite Exercises (Templates Page)
     // ==========================================
 
-    renderFavoritesSection(favorites, activeFilter = 'all') {
+    renderFavoritesSection(favorites, activeFilter = null) {
         // Get unique muscle groups that have exercises
         const muscleGroups = [...new Set((favorites || []).map(f => f.muscleGroup).filter(Boolean))];
 
-        // Filter chips HTML
-        const filterChipsHtml = `
+        // Filter chips HTML - only show if there are muscle groups, no "Alle" button
+        const filterChipsHtml = muscleGroups.length > 0 ? `
             <div class="filter-chips-container">
                 <div class="filter-chips">
-                    <button class="filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">Alle</button>
                     ${muscleGroups.map(mg => `
                         <button class="filter-chip ${activeFilter === mg ? 'active' : ''}" data-filter="${this.escapeHtml(mg)}">${this.escapeHtml(mg)}</button>
                     `).join('')}
                 </div>
             </div>
-        `;
+        ` : '';
 
-        // Filter favorites based on active filter
-        const filteredFavorites = activeFilter === 'all'
+        // Filter favorites based on active filter (null = show all)
+        const filteredFavorites = !activeFilter
             ? favorites
             : (favorites || []).filter(f => f.muscleGroup === activeFilter);
 
@@ -305,7 +303,7 @@ const Components = {
     // Workout Templates (Database Page)
     // ==========================================
 
-    renderTemplatesList(templates, activeFilter = 'all') {
+    renderTemplatesList(templates, activeFilter = null) {
         if (!templates || templates.length === 0) {
             return `
                 <div class="empty-state">
@@ -318,11 +316,10 @@ const Components = {
         // Get unique categories
         const categories = [...new Set(templates.map(t => t.category).filter(Boolean))];
 
-        // Filter chips HTML
+        // Filter chips HTML - no "Alle" button
         const filterChipsHtml = categories.length > 0 ? `
             <div class="filter-chips-container template-filter">
                 <div class="filter-chips">
-                    <button class="filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-template-filter="all">Alle</button>
                     ${categories.map(cat => `
                         <button class="filter-chip ${activeFilter === cat ? 'active' : ''}" data-template-filter="${this.escapeHtml(cat)}">${this.escapeHtml(cat)}</button>
                     `).join('')}
@@ -330,8 +327,8 @@ const Components = {
             </div>
         ` : '';
 
-        // Filter templates
-        const filteredTemplates = activeFilter === 'all'
+        // Filter templates (null = show all)
+        const filteredTemplates = !activeFilter
             ? templates
             : templates.filter(t => t.category === activeFilter);
 
@@ -367,23 +364,17 @@ const Components = {
                         <button class="reorder-btn" data-action="move-up" data-exercise-id="${ex.id}" ${index === 0 ? 'disabled' : ''}>↑</button>
                         <button class="reorder-btn" data-action="move-down" data-exercise-id="${ex.id}" ${index === exerciseCount - 1 ? 'disabled' : ''}>↓</button>
                     </div>
-                    <span class="editor-exercise-name">${this.escapeHtml(ex.name)}</span>
-                    ${ex.muscleGroup ? `<span class="editor-exercise-muscle">${this.escapeHtml(ex.muscleGroup)}</span>` : ''}
-                    <div class="editor-exercise-actions">
-                        <button class="editor-exercise-edit" data-action="edit-exercise" data-exercise-id="${ex.id}" 
-                                data-exercise-name="${this.escapeHtml(ex.name)}" data-exercise-muscle="${this.escapeHtml(ex.muscleGroup || '')}">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                        </button>
-                        <button class="editor-exercise-remove" data-action="remove-exercise" data-exercise-id="${ex.id}">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
+                    <div class="editor-exercise-info" data-action="edit-exercise" data-exercise-id="${ex.id}" 
+                         data-exercise-name="${this.escapeHtml(ex.name)}" data-exercise-muscle="${this.escapeHtml(ex.muscleGroup || '')}">
+                        <span class="editor-exercise-name">${this.escapeHtml(ex.name)}</span>
+                        ${ex.muscleGroup ? `<span class="editor-exercise-muscle">${this.escapeHtml(ex.muscleGroup)}</span>` : ''}
                     </div>
+                    <button class="editor-exercise-remove" data-action="remove-exercise" data-exercise-id="${ex.id}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
                 </div>
                 <div class="editor-exercise-defaults">
                     <div class="editor-input-group">
@@ -411,15 +402,6 @@ const Components = {
                     <button class="editor-back-btn" id="editor-back">← Zurück</button>
                     <input type="text" class="editor-title-input" id="editor-title" value="${this.escapeHtml(template.name)}">
                     <button class="editor-save-btn" id="editor-save">✓</button>
-                </div>
-                <div class="editor-category-row">
-                    <label>Kategorie:</label>
-                    <select id="editor-category" class="editor-category-select">
-                        <option value="" ${!template.category ? 'selected' : ''}>-- Keine --</option>
-                        <option value="Chest & Back" ${template.category === 'Chest & Back' ? 'selected' : ''}>Chest & Back</option>
-                        <option value="Leg Day" ${template.category === 'Leg Day' ? 'selected' : ''}>Leg Day</option>
-                        <option value="Shoulders & Arms" ${template.category === 'Shoulders & Arms' ? 'selected' : ''}>Shoulders & Arms</option>
-                    </select>
                 </div>
                 <div class="editor-exercises-list" id="editor-exercises-list">
                     ${exercisesList || '<p class="editor-empty">Noch keine Übungen in dieser Vorlage.</p>'}

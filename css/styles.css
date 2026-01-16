@@ -1613,6 +1613,22 @@ body {
     border-radius: var(--radius-sm);
 }
 
+/* Clickable exercise info area */
+.editor-exercise-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.editor-exercise-info:hover {
+    background-color: var(--color-gray-100);
+}
+
 .editor-exercise-defaults {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
