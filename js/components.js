@@ -208,12 +208,9 @@ const Components = {
 
     renderFavoritesSection(favorites) {
         const favoritesHtml = (favorites || []).map(fav => `
-            <div class="favorite-card" data-favorite-id="${fav.id}">
-                <div class="favorite-card-actions">
-                    <button class="favorite-edit-btn" data-action="edit-favorite" data-favorite-id="${fav.id}"
-                            data-favorite-name="${this.escapeHtml(fav.name)}" data-favorite-muscle="${this.escapeHtml(fav.muscleGroup)}">✎</button>
-                    <button class="favorite-delete-btn" data-action="delete-favorite" data-favorite-id="${fav.id}">×</button>
-                </div>
+            <div class="favorite-card" data-favorite-id="${fav.id}" data-action="edit-favorite"
+                 data-favorite-name="${this.escapeHtml(fav.name)}" data-favorite-muscle="${this.escapeHtml(fav.muscleGroup)}">
+                <button class="favorite-delete-btn" data-action="delete-favorite" data-favorite-id="${fav.id}">×</button>
                 <span class="favorite-name">${this.escapeHtml(fav.name)}</span>
                 <span class="favorite-muscle">${this.escapeHtml(fav.muscleGroup)}</span>
             </div>

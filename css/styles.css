@@ -1159,13 +1159,20 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    height: 80px;
+    width: 120px;
+    height: 90px;
     padding: var(--spacing-md);
     background-color: var(--color-white);
     border: 1px solid var(--color-gray-200);
     border-radius: var(--radius-lg);
     text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.favorite-card:hover {
+    border-color: var(--color-gray-300);
+    background-color: var(--color-gray-100);
 }
 
 .favorite-delete-btn {
