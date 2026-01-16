@@ -215,6 +215,11 @@ const App = {
 
     renderTemplatesView() {
         const templates = Storage.getWorkoutTemplates();
+        const favorites = Storage.getFavoriteExercises();
+
+        // Always render favorites section
+        document.getElementById('favorites-section').innerHTML = Components.renderFavoritesSection(favorites);
+        this.setupFavoritesListeners();
 
         if (this.editingTemplateId) {
             const template = Storage.getTemplateById(this.editingTemplateId);
@@ -226,6 +231,23 @@ const App = {
         }
 
         document.getElementById('templates-content').innerHTML = Components.renderTemplatesList(templates);
+    },
+
+    setupFavoritesListeners() {
+        // Add favorite button
+        document.getElementById('add-favorite-btn')?.addEventListener('click', () => {
+            this.modalMode = 'favorite';
+            this.openModal('Neue Favoriten-Übung');
+        });
+
+        // Delete favorite buttons
+        document.getElementById('favorites-section')?.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('[data-action="delete-favorite"]');
+            if (deleteBtn) {
+                Storage.deleteFavoriteExercise(deleteBtn.dataset.favoriteId);
+                this.renderTemplatesView();
+            }
+        });
     },
 
     setupEditorListeners() {
@@ -349,12 +371,17 @@ const App = {
             return;
         }
 
-        if (this.modalMode === 'template' && this.editingTemplateId) {
+        if (this.modalMode === 'favorite') {
+            // Add to favorites
+            Storage.addFavoriteExercise(name, muscleGroup);
+            this.closeModal();
+            this.renderTemplatesView();
+        } else if (this.modalMode === 'template' && this.editingTemplateId) {
             Storage.addExerciseToTemplate(this.editingTemplateId, {
                 name,
                 muscleGroup,
-                defaultSets: 3,
-                defaultReps: 10
+                defaultSets: 2,
+                defaultReps: 6
             });
             this.closeModal();
             this.renderTemplatesView();
@@ -363,9 +390,9 @@ const App = {
                 id: Storage.generateId(),
                 name,
                 muscleGroup,
-                sets: '',
+                sets: 2,
                 weight: '',
-                reps: '',
+                reps: 6,
                 completed: false
             };
             Storage.addExercise(this.selectedDate, exercise);

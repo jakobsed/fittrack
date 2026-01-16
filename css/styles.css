@@ -1127,6 +1127,117 @@ body {
 }
 
 /* ============================================
+   V4: Favorite Exercises (Horizontal Scroll)
+   ============================================ */
+
+.favorites-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.favorites-scroll-container {
+    overflow-x: auto;
+    margin: 0 calc(-1 * var(--spacing-md));
+    padding: 0 var(--spacing-md);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.favorites-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+.favorites-scroll {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+}
+
+.favorite-card {
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 80px;
+    padding: var(--spacing-md);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.favorite-delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: var(--color-gray-200);
+    border-radius: 50%;
+    color: var(--color-gray-600);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.favorite-delete-btn:hover {
+    opacity: 1;
+    background: var(--color-accent);
+    color: var(--color-white);
+}
+
+.favorite-name {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--color-black);
+    margin-bottom: var(--spacing-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 90px;
+}
+
+.favorite-muscle {
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-500);
+    padding: 2px 6px;
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-sm);
+}
+
+.favorite-add-btn {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 80px;
+    padding: var(--spacing-md);
+    border: 2px dashed var(--color-gray-300);
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-lg);
+    color: var(--color-gray-500);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.favorite-add-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.favorite-add-icon {
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* ============================================
    V3: Template Cards (Templates Page)
    ============================================ */
 

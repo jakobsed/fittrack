@@ -203,6 +203,35 @@ const Components = {
     },
 
     // ==========================================
+    // Favorite Exercises (Templates Page)
+    // ==========================================
+
+    renderFavoritesSection(favorites) {
+        const favoritesHtml = (favorites || []).map(fav => `
+            <div class="favorite-card" data-favorite-id="${fav.id}">
+                <button class="favorite-delete-btn" data-action="delete-favorite" data-favorite-id="${fav.id}">×</button>
+                <span class="favorite-name">${this.escapeHtml(fav.name)}</span>
+                <span class="favorite-muscle">${this.escapeHtml(fav.muscleGroup)}</span>
+            </div>
+        `).join('');
+
+        return `
+            <div class="favorites-section">
+                <h3 class="subsection-title">Übungsbibliothek</h3>
+                <div class="favorites-scroll-container">
+                    <div class="favorites-scroll">
+                        ${favoritesHtml}
+                        <button class="favorite-add-btn" id="add-favorite-btn">
+                            <span class="favorite-add-icon">+</span>
+                            <span>Neu</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    // ==========================================
     // Workout Templates (Database Page)
     // ==========================================
 

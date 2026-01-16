@@ -14,7 +14,7 @@ const Storage = {
         if (data) {
             return JSON.parse(data);
         }
-        return { workouts: {}, workoutTemplates: [] };
+        return { workouts: {}, workoutTemplates: [], favoriteExercises: [] };
     },
 
     /**
@@ -22,6 +22,47 @@ const Storage = {
      */
     saveData(data) {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+    },
+
+    // ==========================================
+    // Favorite Exercises
+    // ==========================================
+
+    /**
+     * Get all favorite exercises
+     */
+    getFavoriteExercises() {
+        const data = this.getData();
+        return data.favoriteExercises || [];
+    },
+
+    /**
+     * Add a favorite exercise
+     */
+    addFavoriteExercise(name, muscleGroup) {
+        const data = this.getData();
+        if (!data.favoriteExercises) data.favoriteExercises = [];
+
+        const favorite = {
+            id: this.generateId(),
+            name: name,
+            muscleGroup: muscleGroup
+        };
+
+        data.favoriteExercises.push(favorite);
+        this.saveData(data);
+        return favorite;
+    },
+
+    /**
+     * Delete a favorite exercise
+     */
+    deleteFavoriteExercise(id) {
+        const data = this.getData();
+        if (data.favoriteExercises) {
+            data.favoriteExercises = data.favoriteExercises.filter(f => f.id !== id);
+            this.saveData(data);
+        }
     },
 
     // ==========================================
