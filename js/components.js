@@ -80,7 +80,7 @@ const Components = {
     // Workout Template Selection (Home Page)
     // ==========================================
 
-    renderTemplateSelection(templates, hasWorkout) {
+    renderTemplateSelection(templates, hasWorkout, activeFilter = 'all') {
         if (hasWorkout) {
             return ''; // Don't show if workout already exists
         }
@@ -100,8 +100,29 @@ const Components = {
             `;
         }
 
-        const templateButtons = templates.map(t => `
+        // Get unique categories
+        const categories = [...new Set(templates.map(t => t.category).filter(Boolean))];
+
+        // Filter chips HTML
+        const filterChipsHtml = categories.length > 0 ? `
+            <div class="filter-chips-container home-filter">
+                <div class="filter-chips">
+                    <button class="filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-home-filter="all">Alle</button>
+                    ${categories.map(cat => `
+                        <button class="filter-chip ${activeFilter === cat ? 'active' : ''}" data-home-filter="${this.escapeHtml(cat)}">${this.escapeHtml(cat)}</button>
+                    `).join('')}
+                </div>
+            </div>
+        ` : '';
+
+        // Filter templates
+        const filteredTemplates = activeFilter === 'all'
+            ? templates
+            : templates.filter(t => t.category === activeFilter);
+
+        const templateButtons = filteredTemplates.map(t => `
             <button class="template-btn" data-template-id="${t.id}">
+                ${t.category ? `<span class="template-btn-category">${this.escapeHtml(t.category)}</span>` : ''}
                 <span class="template-btn-name">${this.escapeHtml(t.name)}</span>
                 <span class="template-btn-count">${t.exercises?.length || 0} Übungen</span>
             </button>
@@ -110,6 +131,7 @@ const Components = {
         return `
             <div class="template-selection">
                 <p class="template-hint">Workout auswählen:</p>
+                ${filterChipsHtml}
                 <div class="template-buttons">
                     ${templateButtons}
                 </div>

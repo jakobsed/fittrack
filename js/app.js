@@ -133,15 +133,22 @@ const App = {
         if (workout && workout.exercises && workout.exercises.length > 0) {
             content = Components.renderExercises(workout.exercises, workout.templateName);
         } else {
-            content = Components.renderTemplateSelection(templates, false);
+            content = Components.renderTemplateSelection(templates, false, this.homeFilter || 'all');
         }
 
         document.getElementById('day-workout').innerHTML = content;
     },
 
     handleDayWorkoutClick(e) {
-        const target = e.target.closest('[data-action], [data-template-id], #add-exercise-btn, #clear-workout-btn');
+        const target = e.target.closest('[data-action], [data-template-id], [data-home-filter], #add-exercise-btn, #clear-workout-btn');
         if (!target) return;
+
+        // Home filter chip clicks
+        if (target.dataset.homeFilter) {
+            this.homeFilter = target.dataset.homeFilter;
+            this.renderWeekView();
+            return;
+        }
 
         // Template selection
         if (target.dataset.templateId && !target.dataset.action) {
@@ -375,6 +382,7 @@ const App = {
         // Drag and drop reordering
         const exercisesList = document.getElementById('editor-exercises-list');
         if (exercisesList) {
+            // Desktop drag events
             exercisesList.addEventListener('dragstart', (e) => {
                 const item = e.target.closest('.editor-exercise-item');
                 if (item) {
@@ -412,6 +420,77 @@ const App = {
                     }
                     item.classList.remove('drag-over');
                 }
+                this.draggedIndex = undefined;
+            });
+
+            // Mobile touch events
+            let touchStartY = 0;
+            let draggedItem = null;
+            let placeholder = null;
+
+            exercisesList.addEventListener('touchstart', (e) => {
+                const handle = e.target.closest('.drag-handle');
+                if (!handle) return;
+
+                const item = e.target.closest('.editor-exercise-item');
+                if (!item) return;
+
+                e.preventDefault();
+                draggedItem = item;
+                this.draggedIndex = parseInt(item.dataset.index);
+                touchStartY = e.touches[0].clientY;
+
+                item.classList.add('dragging');
+                item.style.position = 'relative';
+                item.style.zIndex = '1000';
+            }, { passive: false });
+
+            exercisesList.addEventListener('touchmove', (e) => {
+                if (!draggedItem) return;
+                e.preventDefault();
+
+                const touch = e.touches[0];
+                const deltaY = touch.clientY - touchStartY;
+                draggedItem.style.transform = `translateY(${deltaY}px)`;
+
+                // Find element under finger
+                draggedItem.style.pointerEvents = 'none';
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                draggedItem.style.pointerEvents = '';
+
+                const itemBelow = elementBelow?.closest('.editor-exercise-item');
+
+                // Clear previous highlights
+                exercisesList.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+                if (itemBelow && itemBelow !== draggedItem) {
+                    itemBelow.classList.add('drag-over');
+                }
+            }, { passive: false });
+
+            exercisesList.addEventListener('touchend', (e) => {
+                if (!draggedItem) return;
+
+                // Find drop target
+                const allItems = [...exercisesList.querySelectorAll('.editor-exercise-item')];
+                const dropTarget = exercisesList.querySelector('.drag-over');
+
+                if (dropTarget) {
+                    const toIndex = parseInt(dropTarget.dataset.index);
+                    if (this.draggedIndex !== toIndex) {
+                        Storage.reorderTemplateExercises(this.editingTemplateId, this.draggedIndex, toIndex);
+                        this.renderTemplatesView();
+                    }
+                }
+
+                // Cleanup
+                draggedItem.classList.remove('dragging');
+                draggedItem.style.transform = '';
+                draggedItem.style.position = '';
+                draggedItem.style.zIndex = '';
+                exercisesList.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+                draggedItem = null;
                 this.draggedIndex = undefined;
             });
         }

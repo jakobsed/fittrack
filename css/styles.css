@@ -565,6 +565,20 @@ body {
     color: var(--color-black);
 }
 
+/* Home Filter */
+.home-filter {
+    margin-bottom: var(--spacing-md);
+}
+
+/* Template Button with Category */
+.template-btn-category {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-accent);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
 /* ============================================
    Stats View
    ============================================ */
