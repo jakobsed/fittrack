@@ -206,8 +206,28 @@ const Components = {
     // Favorite Exercises (Templates Page)
     // ==========================================
 
-    renderFavoritesSection(favorites) {
-        const favoritesHtml = (favorites || []).map(fav => `
+    renderFavoritesSection(favorites, activeFilter = 'all') {
+        // Get unique muscle groups that have exercises
+        const muscleGroups = [...new Set((favorites || []).map(f => f.muscleGroup).filter(Boolean))];
+
+        // Filter chips HTML
+        const filterChipsHtml = `
+            <div class="filter-chips-container">
+                <div class="filter-chips">
+                    <button class="filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">Alle</button>
+                    ${muscleGroups.map(mg => `
+                        <button class="filter-chip ${activeFilter === mg ? 'active' : ''}" data-filter="${this.escapeHtml(mg)}">${this.escapeHtml(mg)}</button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        // Filter favorites based on active filter
+        const filteredFavorites = activeFilter === 'all'
+            ? favorites
+            : (favorites || []).filter(f => f.muscleGroup === activeFilter);
+
+        const favoritesHtml = (filteredFavorites || []).map(fav => `
             <div class="favorite-card" data-favorite-id="${fav.id}" data-action="edit-favorite"
                  data-favorite-name="${this.escapeHtml(fav.name)}" data-favorite-muscle="${this.escapeHtml(fav.muscleGroup)}">
                 <button class="favorite-delete-btn" data-action="delete-favorite" data-favorite-id="${fav.id}">×</button>
@@ -219,6 +239,7 @@ const Components = {
         return `
             <div class="favorites-section">
                 <h3 class="subsection-title">Übungsbibliothek</h3>
+                ${muscleGroups.length > 0 ? filterChipsHtml : ''}
                 <div class="favorites-scroll-container">
                     <div class="favorites-scroll">
                         ${favoritesHtml}

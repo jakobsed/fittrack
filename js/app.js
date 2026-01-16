@@ -226,8 +226,9 @@ const App = {
         const templates = Storage.getWorkoutTemplates();
         const favorites = Storage.getFavoriteExercises();
 
-        // Always render favorites section
-        document.getElementById('favorites-section').innerHTML = Components.renderFavoritesSection(favorites);
+        // Always render favorites section with active filter
+        document.getElementById('favorites-section').innerHTML =
+            Components.renderFavoritesSection(favorites, this.favoriteFilter || 'all');
         this.setupFavoritesListeners();
 
         if (this.editingTemplateId) {
@@ -253,8 +254,10 @@ const App = {
         document.getElementById('favorites-section')?.addEventListener('click', (e) => {
             const deleteBtn = e.target.closest('[data-action="delete-favorite"]');
             if (deleteBtn) {
+                e.stopPropagation();
                 Storage.deleteFavoriteExercise(deleteBtn.dataset.favoriteId);
                 this.renderTemplatesView();
+                return;
             }
 
             const editBtn = e.target.closest('[data-action="edit-favorite"]');
@@ -265,6 +268,14 @@ const App = {
                 // Prefill modal
                 document.getElementById('exercise-name').value = editBtn.dataset.favoriteName || '';
                 document.getElementById('exercise-muscle').value = editBtn.dataset.favoriteMuscle || '';
+                return;
+            }
+
+            // Filter chip clicks
+            const filterChip = e.target.closest('.filter-chip');
+            if (filterChip) {
+                this.favoriteFilter = filterChip.dataset.filter;
+                this.renderTemplatesView();
             }
         });
     },
