@@ -330,7 +330,8 @@ const Storage = {
             if (workoutDate >= startOfWeek && workoutDate <= endOfWeek) {
                 if (workout.exercises) {
                     workout.exercises.forEach(exercise => {
-                        if (exercise.completed && exercise.muscleGroup) {
+                        // Count sets immediately when workout is selected (planning mode)
+                        if (exercise.muscleGroup) {
                             const sets = parseInt(exercise.sets) || 0;
                             if (!muscleStats[exercise.muscleGroup]) {
                                 muscleStats[exercise.muscleGroup] = 0;

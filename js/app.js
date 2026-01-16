@@ -236,7 +236,12 @@ const App = {
 
         if (backBtn) {
             backBtn.addEventListener('click', () => {
+                // If it's a new template, delete it (cancel action)
+                if (this.isNewTemplate && this.editingTemplateId) {
+                    Storage.deleteTemplate(this.editingTemplateId);
+                }
                 this.editingTemplateId = null;
+                this.isNewTemplate = false;
                 this.renderTemplatesView();
             });
         }
@@ -249,6 +254,7 @@ const App = {
                     Storage.updateTemplateName(this.editingTemplateId, title);
                 }
                 this.editingTemplateId = null;
+                this.isNewTemplate = false; // Successfully saved
                 this.renderTemplatesView();
             });
         }
@@ -305,6 +311,7 @@ const App = {
     createNewTemplate() {
         const template = Storage.createTemplate('Neues Workout');
         this.editingTemplateId = template.id;
+        this.isNewTemplate = true; // Flag for back button to delete if cancelled
         this.renderTemplatesView();
     },
 

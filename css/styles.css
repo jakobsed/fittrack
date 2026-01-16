@@ -349,6 +349,7 @@ body {
     border-radius: var(--radius-lg);
     overflow: hidden;
     transition: all var(--transition-fast);
+    margin-bottom: var(--spacing-md);
 }
 
 .exercise-header {
@@ -555,6 +556,7 @@ body {
     color: var(--color-gray-600);
     cursor: pointer;
     transition: all var(--transition-fast);
+    margin-top: var(--spacing-lg);
 }
 
 .add-exercise-btn:hover {
