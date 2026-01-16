@@ -370,7 +370,14 @@ const App = {
     },
 
     setupFavoritesPickerListeners() {
-        document.getElementById('favorites-picker-container')?.addEventListener('click', (e) => {
+        const container = document.getElementById('favorites-picker-container');
+        if (!container) return;
+
+        // Remove any previous listener by cloning the node
+        const newContainer = container.cloneNode(true);
+        container.parentNode.replaceChild(newContainer, container);
+
+        newContainer.addEventListener('click', (e) => {
             const chip = e.target.closest('[data-action="pick-favorite"]');
             if (chip) {
                 const name = chip.dataset.name;
