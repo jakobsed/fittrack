@@ -1568,6 +1568,38 @@ body {
     margin-bottom: var(--spacing-sm);
 }
 
+/* Reorder Buttons */
+.reorder-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.reorder-btn {
+    width: 28px;
+    height: 20px;
+    border: 1px solid var(--color-gray-300);
+    background: var(--color-white);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--color-gray-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.reorder-btn:hover:not(:disabled) {
+    background: var(--color-gray-100);
+    border-color: var(--color-gray-400);
+}
+
+.reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
 .editor-exercise-name {
     font-weight: 500;
     flex: 1;

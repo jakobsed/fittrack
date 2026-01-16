@@ -359,10 +359,14 @@ const Components = {
     },
 
     renderTemplateEditor(template) {
+        const exerciseCount = template.exercises?.length || 0;
         const exercisesList = (template.exercises || []).map((ex, index) => `
-            <div class="editor-exercise-item" data-exercise-id="${ex.id}" data-index="${index}" draggable="true">
+            <div class="editor-exercise-item" data-exercise-id="${ex.id}" data-index="${index}">
                 <div class="editor-exercise-header">
-                    <span class="drag-handle">⋮⋮</span>
+                    <div class="reorder-buttons">
+                        <button class="reorder-btn" data-action="move-up" data-exercise-id="${ex.id}" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="reorder-btn" data-action="move-down" data-exercise-id="${ex.id}" ${index === exerciseCount - 1 ? 'disabled' : ''}>↓</button>
+                    </div>
                     <span class="editor-exercise-name">${this.escapeHtml(ex.name)}</span>
                     ${ex.muscleGroup ? `<span class="editor-exercise-muscle">${this.escapeHtml(ex.muscleGroup)}</span>` : ''}
                     <div class="editor-exercise-actions">
@@ -412,12 +416,9 @@ const Components = {
                     <label>Kategorie:</label>
                     <select id="editor-category" class="editor-category-select">
                         <option value="" ${!template.category ? 'selected' : ''}>-- Keine --</option>
-                        <option value="Push" ${template.category === 'Push' ? 'selected' : ''}>Push</option>
-                        <option value="Pull" ${template.category === 'Pull' ? 'selected' : ''}>Pull</option>
-                        <option value="Legs" ${template.category === 'Legs' ? 'selected' : ''}>Legs</option>
-                        <option value="Upper" ${template.category === 'Upper' ? 'selected' : ''}>Upper Body</option>
-                        <option value="Lower" ${template.category === 'Lower' ? 'selected' : ''}>Lower Body</option>
-                        <option value="Full" ${template.category === 'Full' ? 'selected' : ''}>Full Body</option>
+                        <option value="Chest & Back" ${template.category === 'Chest & Back' ? 'selected' : ''}>Chest & Back</option>
+                        <option value="Leg Day" ${template.category === 'Leg Day' ? 'selected' : ''}>Leg Day</option>
+                        <option value="Shoulders & Arms" ${template.category === 'Shoulders & Arms' ? 'selected' : ''}>Shoulders & Arms</option>
                     </select>
                 </div>
                 <div class="editor-exercises-list" id="editor-exercises-list">

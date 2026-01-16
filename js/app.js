@@ -379,119 +379,29 @@ const App = {
             }
         });
 
-        // Drag and drop reordering
+        // Arrow button reordering (simple, works on mobile)
         const exercisesList = document.getElementById('editor-exercises-list');
         if (exercisesList) {
-            // Desktop drag events
-            exercisesList.addEventListener('dragstart', (e) => {
-                const item = e.target.closest('.editor-exercise-item');
-                if (item) {
-                    this.draggedIndex = parseInt(item.dataset.index);
-                    item.classList.add('dragging');
-                }
-            });
+            exercisesList.addEventListener('click', (e) => {
+                const moveUp = e.target.closest('[data-action="move-up"]');
+                const moveDown = e.target.closest('[data-action="move-down"]');
 
-            exercisesList.addEventListener('dragend', (e) => {
-                const item = e.target.closest('.editor-exercise-item');
-                if (item) item.classList.remove('dragging');
-            });
-
-            exercisesList.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                const item = e.target.closest('.editor-exercise-item');
-                if (item && !item.classList.contains('dragging')) {
-                    item.classList.add('drag-over');
-                }
-            });
-
-            exercisesList.addEventListener('dragleave', (e) => {
-                const item = e.target.closest('.editor-exercise-item');
-                if (item) item.classList.remove('drag-over');
-            });
-
-            exercisesList.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const item = e.target.closest('.editor-exercise-item');
-                if (item && this.draggedIndex !== undefined) {
-                    const toIndex = parseInt(item.dataset.index);
-                    if (this.draggedIndex !== toIndex) {
-                        Storage.reorderTemplateExercises(this.editingTemplateId, this.draggedIndex, toIndex);
-                        this.renderTemplatesView();
-                    }
-                    item.classList.remove('drag-over');
-                }
-                this.draggedIndex = undefined;
-            });
-
-            // Mobile touch events
-            let touchStartY = 0;
-            let draggedItem = null;
-            let placeholder = null;
-
-            exercisesList.addEventListener('touchstart', (e) => {
-                const handle = e.target.closest('.drag-handle');
-                if (!handle) return;
-
-                const item = e.target.closest('.editor-exercise-item');
-                if (!item) return;
-
-                e.preventDefault();
-                draggedItem = item;
-                this.draggedIndex = parseInt(item.dataset.index);
-                touchStartY = e.touches[0].clientY;
-
-                item.classList.add('dragging');
-                item.style.position = 'relative';
-                item.style.zIndex = '1000';
-            }, { passive: false });
-
-            exercisesList.addEventListener('touchmove', (e) => {
-                if (!draggedItem) return;
-                e.preventDefault();
-
-                const touch = e.touches[0];
-                const deltaY = touch.clientY - touchStartY;
-                draggedItem.style.transform = `translateY(${deltaY}px)`;
-
-                // Find element under finger
-                draggedItem.style.pointerEvents = 'none';
-                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-                draggedItem.style.pointerEvents = '';
-
-                const itemBelow = elementBelow?.closest('.editor-exercise-item');
-
-                // Clear previous highlights
-                exercisesList.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-
-                if (itemBelow && itemBelow !== draggedItem) {
-                    itemBelow.classList.add('drag-over');
-                }
-            }, { passive: false });
-
-            exercisesList.addEventListener('touchend', (e) => {
-                if (!draggedItem) return;
-
-                // Find drop target
-                const allItems = [...exercisesList.querySelectorAll('.editor-exercise-item')];
-                const dropTarget = exercisesList.querySelector('.drag-over');
-
-                if (dropTarget) {
-                    const toIndex = parseInt(dropTarget.dataset.index);
-                    if (this.draggedIndex !== toIndex) {
-                        Storage.reorderTemplateExercises(this.editingTemplateId, this.draggedIndex, toIndex);
+                if (moveUp) {
+                    const index = parseInt(moveUp.closest('.editor-exercise-item').dataset.index);
+                    if (index > 0) {
+                        Storage.reorderTemplateExercises(this.editingTemplateId, index, index - 1);
                         this.renderTemplatesView();
                     }
                 }
 
-                // Cleanup
-                draggedItem.classList.remove('dragging');
-                draggedItem.style.transform = '';
-                draggedItem.style.position = '';
-                draggedItem.style.zIndex = '';
-                exercisesList.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-
-                draggedItem = null;
-                this.draggedIndex = undefined;
+                if (moveDown) {
+                    const index = parseInt(moveDown.closest('.editor-exercise-item').dataset.index);
+                    const template = Storage.getTemplateById(this.editingTemplateId);
+                    if (template && index < template.exercises.length - 1) {
+                        Storage.reorderTemplateExercises(this.editingTemplateId, index, index + 1);
+                        this.renderTemplatesView();
+                    }
+                }
             });
         }
     },
