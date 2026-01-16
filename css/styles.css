@@ -1238,6 +1238,61 @@ body {
 }
 
 /* ============================================
+   V4: Favorites Picker in Modal
+   ============================================ */
+
+.favorites-picker {
+    margin-bottom: var(--spacing-lg);
+}
+
+.favorites-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.favorite-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--color-gray-100);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    color: var(--color-black);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.favorite-chip:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.favorites-divider {
+    display: flex;
+    align-items: center;
+    margin: var(--spacing-lg) 0;
+    color: var(--color-gray-400);
+    font-size: var(--font-size-sm);
+}
+
+.favorites-divider::before,
+.favorites-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-gray-200);
+}
+
+.favorites-divider span {
+    padding: 0 var(--spacing-md);
+}
+
+/* ============================================
    V3: Template Cards (Templates Page)
    ============================================ */
 

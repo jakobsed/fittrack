@@ -231,6 +231,32 @@ const Components = {
         `;
     },
 
+    renderFavoritesPicker(favorites) {
+        if (!favorites || favorites.length === 0) {
+            return '';
+        }
+
+        const chips = favorites.map(fav => `
+            <button class="favorite-chip" data-action="pick-favorite" 
+                    data-name="${this.escapeHtml(fav.name)}" 
+                    data-muscle="${this.escapeHtml(fav.muscleGroup)}">
+                ${this.escapeHtml(fav.name)}
+            </button>
+        `).join('');
+
+        return `
+            <div class="favorites-picker">
+                <label class="form-label">Aus Favoriten:</label>
+                <div class="favorites-chips">
+                    ${chips}
+                </div>
+                <div class="favorites-divider">
+                    <span>oder neue Übung</span>
+                </div>
+            </div>
+        `;
+    },
+
     // ==========================================
     // Workout Templates (Database Page)
     // ==========================================

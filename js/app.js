@@ -354,8 +354,39 @@ const App = {
         document.getElementById('exercise-name').value = '';
         document.getElementById('exercise-muscle').value = '';
         document.getElementById('modal-title').textContent = title;
+
+        // Inject favorites picker if in template mode
+        const pickerContainer = document.getElementById('favorites-picker-container');
+        if (this.modalMode === 'template') {
+            const favorites = Storage.getFavoriteExercises();
+            pickerContainer.innerHTML = Components.renderFavoritesPicker(favorites);
+            this.setupFavoritesPickerListeners();
+        } else {
+            pickerContainer.innerHTML = '';
+        }
+
         document.getElementById('exercise-modal').classList.add('show');
         document.getElementById('exercise-name').focus();
+    },
+
+    setupFavoritesPickerListeners() {
+        document.getElementById('favorites-picker-container')?.addEventListener('click', (e) => {
+            const chip = e.target.closest('[data-action="pick-favorite"]');
+            if (chip) {
+                const name = chip.dataset.name;
+                const muscle = chip.dataset.muscle;
+
+                // Add the favorite exercise directly to the template
+                Storage.addExerciseToTemplate(this.editingTemplateId, {
+                    name,
+                    muscleGroup: muscle,
+                    defaultSets: 2,
+                    defaultReps: 6
+                });
+                this.closeModal();
+                this.renderTemplatesView();
+            }
+        });
     },
 
     closeModal() {
