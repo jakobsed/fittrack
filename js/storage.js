@@ -65,6 +65,21 @@ const Storage = {
         }
     },
 
+    /**
+     * Update a favorite exercise
+     */
+    updateFavoriteExercise(id, name, muscleGroup) {
+        const data = this.getData();
+        if (data.favoriteExercises) {
+            const favorite = data.favoriteExercises.find(f => f.id === id);
+            if (favorite) {
+                favorite.name = name;
+                favorite.muscleGroup = muscleGroup;
+                this.saveData(data);
+            }
+        }
+    },
+
     // ==========================================
     // Workout Templates
     // ==========================================
@@ -122,6 +137,19 @@ const Storage = {
         const data = this.getData();
         if (data.workoutTemplates) {
             data.workoutTemplates = data.workoutTemplates.filter(t => t.id !== templateId);
+            this.saveData(data);
+        }
+    },
+
+    /**
+     * Reorder exercises in a template
+     */
+    reorderTemplateExercises(templateId, fromIndex, toIndex) {
+        const data = this.getData();
+        const template = data.workoutTemplates?.find(t => t.id === templateId);
+        if (template && template.exercises) {
+            const [moved] = template.exercises.splice(fromIndex, 1);
+            template.exercises.splice(toIndex, 0, moved);
             this.saveData(data);
         }
     },

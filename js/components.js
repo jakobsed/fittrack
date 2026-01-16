@@ -209,7 +209,11 @@ const Components = {
     renderFavoritesSection(favorites) {
         const favoritesHtml = (favorites || []).map(fav => `
             <div class="favorite-card" data-favorite-id="${fav.id}">
-                <button class="favorite-delete-btn" data-action="delete-favorite" data-favorite-id="${fav.id}">×</button>
+                <div class="favorite-card-actions">
+                    <button class="favorite-edit-btn" data-action="edit-favorite" data-favorite-id="${fav.id}"
+                            data-favorite-name="${this.escapeHtml(fav.name)}" data-favorite-muscle="${this.escapeHtml(fav.muscleGroup)}">✎</button>
+                    <button class="favorite-delete-btn" data-action="delete-favorite" data-favorite-id="${fav.id}">×</button>
+                </div>
                 <span class="favorite-name">${this.escapeHtml(fav.name)}</span>
                 <span class="favorite-muscle">${this.escapeHtml(fav.muscleGroup)}</span>
             </div>
@@ -292,17 +296,27 @@ const Components = {
     },
 
     renderTemplateEditor(template) {
-        const exercisesList = (template.exercises || []).map(ex => `
-            <div class="editor-exercise-item" data-exercise-id="${ex.id}">
+        const exercisesList = (template.exercises || []).map((ex, index) => `
+            <div class="editor-exercise-item" data-exercise-id="${ex.id}" data-index="${index}" draggable="true">
                 <div class="editor-exercise-header">
+                    <span class="drag-handle">⋮⋮</span>
                     <span class="editor-exercise-name">${this.escapeHtml(ex.name)}</span>
                     ${ex.muscleGroup ? `<span class="editor-exercise-muscle">${this.escapeHtml(ex.muscleGroup)}</span>` : ''}
-                    <button class="editor-exercise-remove" data-action="remove-exercise" data-exercise-id="${ex.id}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+                    <div class="editor-exercise-actions">
+                        <button class="editor-exercise-edit" data-action="edit-exercise" data-exercise-id="${ex.id}" 
+                                data-exercise-name="${this.escapeHtml(ex.name)}" data-exercise-muscle="${this.escapeHtml(ex.muscleGroup || '')}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                        <button class="editor-exercise-remove" data-action="remove-exercise" data-exercise-id="${ex.id}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="editor-exercise-defaults">
                     <div class="editor-input-group">

@@ -207,6 +207,15 @@ const App = {
         const field = e.target.dataset.field;
         const value = e.target.value;
         Storage.updateExercise(this.selectedDate, exerciseId, { [field]: value });
+
+        // Sync changes back to template
+        const workout = Storage.getWorkout(this.selectedDate);
+        if (workout?.templateId) {
+            const exercise = workout.exercises?.find(ex => ex.id === exerciseId);
+            if (exercise) {
+                Storage.syncWorkoutToTemplate(workout.templateId, exercise.name, { [field]: value });
+            }
+        }
     },
 
     // ==========================================
@@ -240,12 +249,22 @@ const App = {
             this.openModal('Neue Favoriten-Übung');
         });
 
-        // Delete favorite buttons
+        // Delete and Edit favorite buttons
         document.getElementById('favorites-section')?.addEventListener('click', (e) => {
             const deleteBtn = e.target.closest('[data-action="delete-favorite"]');
             if (deleteBtn) {
                 Storage.deleteFavoriteExercise(deleteBtn.dataset.favoriteId);
                 this.renderTemplatesView();
+            }
+
+            const editBtn = e.target.closest('[data-action="edit-favorite"]');
+            if (editBtn) {
+                this.editingFavoriteId = editBtn.dataset.favoriteId;
+                this.modalMode = 'edit-favorite';
+                this.openModal('Favorit bearbeiten');
+                // Prefill modal
+                document.getElementById('exercise-name').value = editBtn.dataset.favoriteName || '';
+                document.getElementById('exercise-muscle').value = editBtn.dataset.favoriteMuscle || '';
             }
         });
     },
@@ -301,6 +320,17 @@ const App = {
                 Storage.removeExerciseFromTemplate(this.editingTemplateId, removeBtn.dataset.exerciseId);
                 this.renderTemplatesView();
             }
+
+            // Edit exercise button
+            const editBtn = e.target.closest('[data-action="edit-exercise"]');
+            if (editBtn) {
+                this.editingExerciseId = editBtn.dataset.exerciseId;
+                this.modalMode = 'edit-exercise';
+                this.openModal('Übung bearbeiten');
+                // Prefill modal
+                document.getElementById('exercise-name').value = editBtn.dataset.exerciseName || '';
+                document.getElementById('exercise-muscle').value = editBtn.dataset.exerciseMuscle || '';
+            }
         });
 
         // Update exercise defaults in template
@@ -312,6 +342,50 @@ const App = {
                 Storage.updateExerciseInTemplate(this.editingTemplateId, exerciseId, { [field]: value });
             }
         });
+
+        // Drag and drop reordering
+        const exercisesList = document.getElementById('editor-exercises-list');
+        if (exercisesList) {
+            exercisesList.addEventListener('dragstart', (e) => {
+                const item = e.target.closest('.editor-exercise-item');
+                if (item) {
+                    this.draggedIndex = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                }
+            });
+
+            exercisesList.addEventListener('dragend', (e) => {
+                const item = e.target.closest('.editor-exercise-item');
+                if (item) item.classList.remove('dragging');
+            });
+
+            exercisesList.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const item = e.target.closest('.editor-exercise-item');
+                if (item && !item.classList.contains('dragging')) {
+                    item.classList.add('drag-over');
+                }
+            });
+
+            exercisesList.addEventListener('dragleave', (e) => {
+                const item = e.target.closest('.editor-exercise-item');
+                if (item) item.classList.remove('drag-over');
+            });
+
+            exercisesList.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const item = e.target.closest('.editor-exercise-item');
+                if (item && this.draggedIndex !== undefined) {
+                    const toIndex = parseInt(item.dataset.index);
+                    if (this.draggedIndex !== toIndex) {
+                        Storage.reorderTemplateExercises(this.editingTemplateId, this.draggedIndex, toIndex);
+                        this.renderTemplatesView();
+                    }
+                    item.classList.remove('drag-over');
+                }
+                this.draggedIndex = undefined;
+            });
+        }
     },
 
     handleTemplatesClick(e) {
@@ -412,6 +486,21 @@ const App = {
         if (this.modalMode === 'favorite') {
             // Add to favorites
             Storage.addFavoriteExercise(name, muscleGroup);
+            this.closeModal();
+            this.renderTemplatesView();
+        } else if (this.modalMode === 'edit-favorite' && this.editingFavoriteId) {
+            // Update existing favorite
+            Storage.updateFavoriteExercise(this.editingFavoriteId, name, muscleGroup);
+            this.editingFavoriteId = null;
+            this.closeModal();
+            this.renderTemplatesView();
+        } else if (this.modalMode === 'edit-exercise' && this.editingExerciseId && this.editingTemplateId) {
+            // Update existing exercise in template
+            Storage.updateExerciseInTemplate(this.editingTemplateId, this.editingExerciseId, {
+                name,
+                muscleGroup
+            });
+            this.editingExerciseId = null;
             this.closeModal();
             this.renderTemplatesView();
         } else if (this.modalMode === 'template' && this.editingTemplateId) {

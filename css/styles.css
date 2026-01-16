@@ -1572,3 +1572,100 @@ body {
     font-size: 10px;
     fill: var(--color-gray-500);
 }
+
+/* ============================================
+   V4: Drag & Drop + Edit Buttons
+   ============================================ */
+
+.drag-handle {
+    cursor: grab;
+    color: var(--color-gray-400);
+    font-size: 16px;
+    padding: 0 var(--spacing-sm);
+    user-select: none;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.editor-exercise-item {
+    transition: all var(--transition-fast);
+}
+
+.editor-exercise-item.dragging {
+    opacity: 0.5;
+    background-color: var(--color-gray-100);
+}
+
+.editor-exercise-item.drag-over {
+    border-top: 3px solid var(--color-accent);
+}
+
+.editor-exercise-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.editor-exercise-edit,
+.editor-exercise-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--color-gray-500);
+    transition: all var(--transition-fast);
+}
+
+.editor-exercise-edit:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-primary);
+}
+
+.editor-exercise-remove:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-accent);
+}
+
+/* Favorite card actions */
+.favorite-card-actions {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: flex;
+    gap: 2px;
+}
+
+.favorite-edit-btn,
+.favorite-delete-btn {
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: var(--color-gray-200);
+    border-radius: 50%;
+    color: var(--color-gray-600);
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favorite-edit-btn:hover {
+    opacity: 1;
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+.favorite-delete-btn:hover {
+    opacity: 1;
+    background: var(--color-accent);
+    color: var(--color-white);
+}
