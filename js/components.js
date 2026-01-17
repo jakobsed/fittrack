@@ -80,7 +80,7 @@ const Components = {
     // Workout Template Selection (Home Page)
     // ==========================================
 
-    renderTemplateSelection(templates, hasWorkout, activeFilter = null) {
+    renderTemplateSelection(templates, hasWorkout) {
         if (hasWorkout) {
             return ''; // Don't show if workout already exists
         }
@@ -100,28 +100,8 @@ const Components = {
             `;
         }
 
-        // Get unique categories
-        const categories = [...new Set(templates.map(t => t.category).filter(Boolean))];
-
-        // Filter chips HTML - no "Alle" button
-        const filterChipsHtml = categories.length > 0 ? `
-            <div class="filter-chips-container home-filter">
-                <div class="filter-chips">
-                    ${categories.map(cat => `
-                        <button class="filter-chip ${activeFilter === cat ? 'active' : ''}" data-home-filter="${this.escapeHtml(cat)}">${this.escapeHtml(cat)}</button>
-                    `).join('')}
-                </div>
-            </div>
-        ` : '';
-
-        // Filter templates (null = show all)
-        const filteredTemplates = !activeFilter
-            ? templates
-            : templates.filter(t => t.category === activeFilter);
-
-        const templateButtons = filteredTemplates.map(t => `
+        const templateButtons = templates.map(t => `
             <button class="template-btn" data-template-id="${t.id}">
-                ${t.category ? `<span class="template-btn-category">${this.escapeHtml(t.category)}</span>` : ''}
                 <span class="template-btn-name">${this.escapeHtml(t.name)}</span>
                 <span class="template-btn-count">${t.exercises?.length || 0} Übungen</span>
             </button>
@@ -130,7 +110,6 @@ const Components = {
         return `
             <div class="template-selection">
                 <p class="template-hint">Workout auswählen:</p>
-                ${filterChipsHtml}
                 <div class="template-buttons">
                     ${templateButtons}
                 </div>
@@ -227,27 +206,8 @@ const Components = {
     // Favorite Exercises (Templates Page)
     // ==========================================
 
-    renderFavoritesSection(favorites, activeFilter = null) {
-        // Get unique muscle groups that have exercises
-        const muscleGroups = [...new Set((favorites || []).map(f => f.muscleGroup).filter(Boolean))];
-
-        // Filter chips HTML - only show if there are muscle groups, no "Alle" button
-        const filterChipsHtml = muscleGroups.length > 0 ? `
-            <div class="filter-chips-container">
-                <div class="filter-chips">
-                    ${muscleGroups.map(mg => `
-                        <button class="filter-chip ${activeFilter === mg ? 'active' : ''}" data-filter="${this.escapeHtml(mg)}">${this.escapeHtml(mg)}</button>
-                    `).join('')}
-                </div>
-            </div>
-        ` : '';
-
-        // Filter favorites based on active filter (null = show all)
-        const filteredFavorites = !activeFilter
-            ? favorites
-            : (favorites || []).filter(f => f.muscleGroup === activeFilter);
-
-        const favoritesHtml = (filteredFavorites || []).map(fav => `
+    renderFavoritesSection(favorites) {
+        const favoritesHtml = (favorites || []).map(fav => `
             <div class="favorite-card" data-favorite-id="${fav.id}" data-action="edit-favorite"
                  data-favorite-name="${this.escapeHtml(fav.name)}" data-favorite-muscle="${this.escapeHtml(fav.muscleGroup)}">
                 <button class="favorite-delete-btn" data-action="delete-favorite" data-favorite-id="${fav.id}">×</button>
@@ -259,7 +219,6 @@ const Components = {
         return `
             <div class="favorites-section">
                 <h3 class="subsection-title">Übungsbibliothek</h3>
-                ${muscleGroups.length > 0 ? filterChipsHtml : ''}
                 <div class="favorites-scroll-container">
                     <div class="favorites-scroll">
                         ${favoritesHtml}
@@ -303,7 +262,7 @@ const Components = {
     // Workout Templates (Database Page)
     // ==========================================
 
-    renderTemplatesList(templates, activeFilter = null) {
+    renderTemplatesList(templates) {
         if (!templates || templates.length === 0) {
             return `
                 <div class="empty-state">
@@ -313,32 +272,12 @@ const Components = {
             `;
         }
 
-        // Get unique categories
-        const categories = [...new Set(templates.map(t => t.category).filter(Boolean))];
-
-        // Filter chips HTML - no "Alle" button
-        const filterChipsHtml = categories.length > 0 ? `
-            <div class="filter-chips-container template-filter">
-                <div class="filter-chips">
-                    ${categories.map(cat => `
-                        <button class="filter-chip ${activeFilter === cat ? 'active' : ''}" data-template-filter="${this.escapeHtml(cat)}">${this.escapeHtml(cat)}</button>
-                    `).join('')}
-                </div>
-            </div>
-        ` : '';
-
-        // Filter templates (null = show all)
-        const filteredTemplates = !activeFilter
-            ? templates
-            : templates.filter(t => t.category === activeFilter);
-
-        const templatesHtml = filteredTemplates.map(template => `
+        const templatesHtml = templates.map(template => `
             <div class="template-card" data-template-id="${template.id}">
                 <div class="template-card-header">
                     <span class="template-card-name">${this.escapeHtml(template.name)}</span>
                     <span class="template-card-count">${template.exercises?.length || 0} Übungen</span>
                 </div>
-                ${template.category ? `<span class="template-category-tag">${this.escapeHtml(template.category)}</span>` : ''}
                 <div class="template-card-exercises">
                     ${(template.exercises || []).slice(0, 3).map(ex =>
             `<span class="template-exercise-tag">${this.escapeHtml(ex.name)}</span>`
@@ -352,7 +291,7 @@ const Components = {
             </div>
         `).join('');
 
-        return filterChipsHtml + templatesHtml;
+        return templatesHtml;
     },
 
     renderTemplateEditor(template) {
