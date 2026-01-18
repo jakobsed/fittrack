@@ -22,7 +22,7 @@ const HomeScreen = {
             <div class="home-screen animate-fade-in">
                 <div class="screen-header">
                     <h1 class="greeting">
-                        Willkommen! <span class="greeting-emoji">💪</span>
+                        Willkommen
                     </h1>
                     <button class="btn btn-ghost btn-icon" onclick="App.navigate('exercises')">
                         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
@@ -37,17 +37,14 @@ const HomeScreen = {
                     <h3 class="text-sm font-semibold text-secondary mb-md">Diese Woche</h3>
                     <div class="stats-grid">
                         <div class="stat-item">
-                            <span class="stat-icon">🏋️</span>
                             <span class="stat-value">${weekWorkouts.length}</span>
                             <span class="stat-label">Workouts</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-icon">⏱️</span>
                             <span class="stat-value">${durationStr || '0min'}</span>
                             <span class="stat-label">Zeit</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-icon">💪</span>
                             <span class="stat-value">${totalSets}</span>
                             <span class="stat-label">Sets</span>
                         </div>
@@ -62,10 +59,9 @@ const HomeScreen = {
                     </div>
                 ` : `
                     <div class="empty-state">
-                        <div class="empty-state-icon">🏃</div>
                         <div class="empty-state-title">Noch keine Workouts</div>
                         <div class="empty-state-text">
-                            Starte dein erstes Workout und beginne deinen Fortschritt zu tracken!
+                            Starte dein erstes Workout und beginne deinen Fortschritt zu tracken.
                         </div>
                     </div>
                 `}
@@ -121,7 +117,6 @@ const HomeScreen = {
                     <div class="section-title">Vorlage wählen</div>
                     ${templates.map(t => `
                         <div class="list-item" onclick="WorkoutScreen.startFromTemplate('${t.id}')">
-                            <div class="list-item-icon">💪</div>
                             <div class="list-item-content">
                                 <div class="list-item-title">${t.name}</div>
                                 <div class="list-item-subtitle">${t.exerciseIds.length} Übungen</div>

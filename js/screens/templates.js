@@ -26,7 +26,6 @@ const TemplatesScreen = {
                     </div>
                 ` : `
                     <div class="empty-state">
-                        <div class="empty-state-icon">📋</div>
                         <div class="empty-state-title">Keine Vorlagen</div>
                         <div class="empty-state-text">
                             Erstelle Workout-Vorlagen für schnelleren Zugriff auf deine Trainingsroutinen.

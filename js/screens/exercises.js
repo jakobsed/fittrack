@@ -4,7 +4,7 @@
    ======================================== */
 
 const ExercisesScreen = {
-    filter: 'all', // 'all', 'favorites', or muscle group id
+    filter: 'all', // 'all' or muscle group id
     searchQuery: '',
 
     render() {
@@ -49,10 +49,6 @@ const ExercisesScreen = {
                             onclick="ExercisesScreen.setFilter('all')">
                         Alle
                     </button>
-                    <button class="filter-tab ${this.filter === 'favorites' ? 'active' : ''}" 
-                            onclick="ExercisesScreen.setFilter('favorites')">
-                        ⭐ Favoriten
-                    </button>
                     ${Object.keys(MUSCLE_GROUPS).map(id => `
                         <button class="filter-tab ${this.filter === id ? 'active' : ''}" 
                                 onclick="ExercisesScreen.setFilter('${id}')">
@@ -80,9 +76,7 @@ const ExercisesScreen = {
         }
 
         // Apply filter
-        if (this.filter === 'favorites') {
-            exercises = exercises.filter(e => e.isFavorite);
-        } else if (this.filter !== 'all') {
+        if (this.filter !== 'all') {
             exercises = exercises.filter(e => e.muscleGroup === this.filter);
         }
 
@@ -93,12 +87,9 @@ const ExercisesScreen = {
         if (exercises.length === 0) {
             return `
                 <div class="empty-state">
-                    <div class="empty-state-icon">🔍</div>
-                    <div class="empty-state-title">Keine Übungen gefunden</div>
+                    <div class="empty-state-title">Keine Übungen</div>
                     <div class="empty-state-text">
-                        ${this.searchQuery ? 'Versuche einen anderen Suchbegriff.' :
-                    this.filter === 'favorites' ? 'Markiere Übungen als Favorit mit dem Stern.' :
-                        'Erstelle eine neue Übung.'}
+                        ${this.searchQuery ? 'Versuche einen anderen Suchbegriff.' : 'Füge deine erste Übung hinzu.'}
                     </div>
                 </div>
             `;
@@ -129,21 +120,13 @@ const ExercisesScreen = {
             <div class="exercise-item">
                 <span class="exercise-item-name">${ex.name}</span>
                 <span class="tag tag-${ex.muscleGroup}">${muscle.name}</span>
-                <button class="favorite-btn ${ex.isFavorite ? 'active' : ''}" 
-                        onclick="event.stopPropagation(); ExercisesScreen.toggleFavorite('${ex.id}')">
-                    <svg viewBox="0 0 24 24" fill="${ex.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                <button class="btn btn-ghost btn-icon-sm" 
+                        onclick="event.stopPropagation(); ExercisesScreen.deleteExercise('${ex.id}')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     </svg>
                 </button>
-                ${ex.isCustom ? `
-                    <button class="btn btn-ghost btn-icon-sm" 
-                            onclick="event.stopPropagation(); ExercisesScreen.deleteExercise('${ex.id}')">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                    </button>
-                ` : ''}
             </div>
         `;
     },
@@ -155,11 +138,6 @@ const ExercisesScreen = {
 
     setFilter(filter) {
         this.filter = filter;
-        App.refreshScreen();
-    },
-
-    toggleFavorite(id) {
-        Storage.toggleFavorite(id);
         App.refreshScreen();
     },
 
@@ -178,11 +156,6 @@ const ExercisesScreen = {
                     `).join('')}
                 </select>
             </div>
-
-            <label class="checkbox-wrapper mb-md">
-                <input type="checkbox" id="exercise-favorite" style="width: 18px; height: 18px; accent-color: var(--color-accent);">
-                <span>Als Favorit markieren</span>
-            </label>
         `;
 
         const footer = `
@@ -201,7 +174,6 @@ const ExercisesScreen = {
     saveExercise() {
         const nameInput = document.getElementById('exercise-name');
         const muscleSelect = document.getElementById('exercise-muscle');
-        const favoriteCheckbox = document.getElementById('exercise-favorite');
 
         const name = nameInput?.value.trim();
         if (!name) {
@@ -211,8 +183,7 @@ const ExercisesScreen = {
 
         Storage.addExercise({
             name: name,
-            muscleGroup: muscleSelect.value,
-            isFavorite: favoriteCheckbox.checked
+            muscleGroup: muscleSelect.value
         });
 
         Modal.close();

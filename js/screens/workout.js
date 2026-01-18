@@ -141,12 +141,6 @@ const WorkoutScreen = {
                         <div class="exercise-name">${exercise.name}</div>
                         <span class="tag tag-${exercise.muscleGroup} exercise-muscle">${muscle.name}</span>
                     </div>
-                    <button class="favorite-btn ${exercise.isFavorite ? 'active' : ''}" 
-                            onclick="WorkoutScreen.toggleFavorite('${exercise.id}')">
-                        <svg viewBox="0 0 24 24" fill="${exercise.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                    </button>
                 </div>
 
                 <table class="sets-table">
@@ -253,10 +247,7 @@ const WorkoutScreen = {
         App.refreshScreen();
     },
 
-    toggleFavorite(exerciseId) {
-        Storage.toggleFavorite(exerciseId);
-        App.refreshScreen();
-    },
+
 
     showAddExerciseModal() {
         const exercises = Storage.getExercises();
@@ -272,14 +263,13 @@ const WorkoutScreen = {
                        oninput="WorkoutScreen.filterExercises(this.value)">
             </div>
             
-            ${favorites.length > 0 ? `
-                <div class="exercise-group">
-                    <div class="exercise-group-title">⭐ Favoriten</div>
-                    <div id="favorites-list">
-                        ${favorites.map(ex => this.renderExerciseItem(ex)).join('')}
-                    </div>
+            ${exercises.length === 0 ? `
+                <div class="empty-state">
+                    <div class="empty-state-title">Keine Übungen</div>
+                    <div class="empty-state-text">Füge zuerst Übungen in der Übungsverwaltung hinzu.</div>
                 </div>
             ` : ''}
+            
             
             <div id="all-exercises-list">
                 ${Object.keys(MUSCLE_GROUPS).map(muscleId => {
@@ -416,7 +406,7 @@ const WorkoutScreen = {
         if (container) {
             container.innerHTML = `
                 <div class="rest-timer-card" style="background: var(--color-success-light);">
-                    <div class="rest-timer-time" style="color: var(--color-success);">Pause vorbei! 💪</div>
+                    <div class="rest-timer-time" style="color: var(--color-success);">Pause vorbei</div>
                     <button class="btn btn-sm btn-primary mt-md" onclick="WorkoutScreen.stopRestTimer()">OK</button>
                 </div>
             `;

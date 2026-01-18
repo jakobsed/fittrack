@@ -95,18 +95,6 @@ const Storage = {
         this.set(this.KEYS.EXERCISES, filtered);
     },
 
-    toggleFavorite(id) {
-        const exercise = this.getExercise(id);
-        if (exercise) {
-            return this.updateExercise(id, { isFavorite: !exercise.isFavorite });
-        }
-        return null;
-    },
-
-    getFavoriteExercises() {
-        return this.getExercises().filter(ex => ex.isFavorite);
-    },
-
     getExercisesByMuscle(muscleGroup) {
         return this.getExercises().filter(ex => ex.muscleGroup === muscleGroup);
     },
