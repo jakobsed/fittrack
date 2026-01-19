@@ -5,7 +5,6 @@
 
 const WorkoutScreen = {
     workout: null,
-    timerRunning: false,
 
     // Start a workout from a template
     startFromTemplate(templateId) {
@@ -18,24 +17,17 @@ const WorkoutScreen = {
             name: template.name,
             templateId: templateId,
             startTime: Date.now(),
-            exercises: template.exerciseIds.map(exId => ({
-                exerciseId: exId,
-                sets: [{ weight: '', reps: '', completed: false }]
-            }))
+            exercises: template.exerciseIds.map(exId => {
+                const lastData = Storage.getLastExerciseData(exId);
+                return {
+                    exerciseId: exId,
+                    weight: lastData?.weight || '',
+                    reps: lastData?.reps || '',
+                    targetSets: lastData?.targetSets || 3,
+                    completedSets: 0
+                };
+            })
         };
-
-        // Pre-fill with last workout data
-        this.workout.exercises.forEach(ex => {
-            const lastData = Storage.getLastExerciseData(ex.exerciseId);
-            if (lastData && lastData.length > 0) {
-                ex.sets = lastData.map(s => ({
-                    weight: s.weight || '',
-                    reps: s.reps || '',
-                    completed: false,
-                    previous: `${s.weight}×${s.reps}`
-                }));
-            }
-        });
 
         Storage.setActiveWorkout(this.workout);
         WorkoutTimer.start((elapsed) => this.updateWorkoutTime(elapsed));
@@ -134,6 +126,21 @@ const WorkoutScreen = {
 
         const muscle = getMuscleGroup(exercise.muscleGroup);
 
+        // Generate set checkboxes
+        const setCheckboxes = [];
+        for (let i = 0; i < ex.targetSets; i++) {
+            const isCompleted = i < ex.completedSets;
+            setCheckboxes.push(`
+                <div class="set-checkbox ${isCompleted ? 'checked' : ''}" 
+                     onclick="WorkoutScreen.toggleSet(${index}, ${i})">
+                    <span class="set-number">${i + 1}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+            `);
+        }
+
         return `
             <div class="exercise-card" data-index="${index}">
                 <div class="exercise-header">
@@ -141,60 +148,54 @@ const WorkoutScreen = {
                         <div class="exercise-name">${exercise.name}</div>
                         <span class="tag tag-${exercise.muscleGroup} exercise-muscle">${muscle.name}</span>
                     </div>
+                    <button class="btn btn-ghost btn-icon-sm" onclick="WorkoutScreen.removeExercise(${index})">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
                 </div>
 
-                <table class="sets-table">
-                    <thead>
-                        <tr>
-                            <th>Set</th>
-                            <th>Vorher</th>
-                            <th>kg</th>
-                            <th>Reps</th>
-                            <th>✓</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${ex.sets.map((set, setIndex) => this.renderSet(set, index, setIndex)).join('')}
-                    </tbody>
-                </table>
-
-                <button class="add-set-btn" onclick="WorkoutScreen.addSet(${index})">
-                    + Set hinzufügen
-                </button>
-            </div>
-        `;
-    },
-
-    renderSet(set, exIndex, setIndex) {
-        return `
-            <tr class="set-row ${set.completed ? 'completed' : ''}" data-ex="${exIndex}" data-set="${setIndex}">
-                <td class="set-num">${setIndex + 1}</td>
-                <td class="previous">${set.previous || '-'}</td>
-                <td class="input-cell">
-                    <input type="number" 
-                           class="set-input" 
-                           value="${set.weight}" 
-                           placeholder="0"
-                           inputmode="decimal"
-                           onchange="WorkoutScreen.updateSet(${exIndex}, ${setIndex}, 'weight', this.value)">
-                </td>
-                <td class="input-cell">
-                    <input type="number" 
-                           class="set-input" 
-                           value="${set.reps}" 
-                           placeholder="0"
-                           inputmode="numeric"
-                           onchange="WorkoutScreen.updateSet(${exIndex}, ${setIndex}, 'reps', this.value)">
-                </td>
-                <td class="check-cell">
-                    <div class="checkbox ${set.completed ? 'checked' : ''}" 
-                         onclick="WorkoutScreen.toggleSetComplete(${exIndex}, ${setIndex})">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
+                <!-- Simplified Input Row -->
+                <div class="exercise-inputs">
+                    <div class="input-group-inline">
+                        <label>kg</label>
+                        <input type="number" 
+                               class="set-input" 
+                               value="${ex.weight}" 
+                               placeholder="0"
+                               inputmode="decimal"
+                               onchange="WorkoutScreen.updateExercise(${index}, 'weight', this.value)">
                     </div>
-                </td>
-            </tr>
+                    <div class="input-group-inline">
+                        <label>Reps</label>
+                        <input type="number" 
+                               class="set-input" 
+                               value="${ex.reps}" 
+                               placeholder="0"
+                               inputmode="numeric"
+                               onchange="WorkoutScreen.updateExercise(${index}, 'reps', this.value)">
+                    </div>
+                    <div class="input-group-inline">
+                        <label>Sets</label>
+                        <div class="set-counter">
+                            <button class="counter-btn" onclick="WorkoutScreen.adjustSets(${index}, -1)">−</button>
+                            <span class="counter-value">${ex.targetSets}</span>
+                            <button class="counter-btn" onclick="WorkoutScreen.adjustSets(${index}, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Set Checkboxes -->
+                <div class="set-checkboxes">
+                    ${setCheckboxes.join('')}
+                </div>
+
+                <!-- Progress indicator -->
+                <div class="exercise-progress">
+                    ${ex.completedSets} / ${ex.targetSets} Sets
+                </div>
+            </div>
         `;
     },
 
@@ -205,53 +206,60 @@ const WorkoutScreen = {
         }
     },
 
-    updateSet(exIndex, setIndex, field, value) {
+    updateExercise(index, field, value) {
         if (!this.workout) return;
 
         const numValue = parseFloat(value) || '';
-        this.workout.exercises[exIndex].sets[setIndex][field] = numValue;
+        this.workout.exercises[index][field] = numValue;
         Storage.setActiveWorkout(this.workout);
     },
 
-    toggleSetComplete(exIndex, setIndex) {
+    adjustSets(index, delta) {
         if (!this.workout) return;
 
-        const set = this.workout.exercises[exIndex].sets[setIndex];
-        set.completed = !set.completed;
-        Storage.setActiveWorkout(this.workout);
+        const ex = this.workout.exercises[index];
+        const newTarget = Math.max(1, Math.min(10, ex.targetSets + delta));
+        ex.targetSets = newTarget;
 
-        // Update UI
-        const row = document.querySelector(`tr[data-ex="${exIndex}"][data-set="${setIndex}"]`);
-        if (row) {
-            row.classList.toggle('completed', set.completed);
-            row.querySelector('.checkbox').classList.toggle('checked', set.completed);
+        // Adjust completed sets if needed
+        if (ex.completedSets > newTarget) {
+            ex.completedSets = newTarget;
         }
-
-        // Start rest timer if set completed
-        if (set.completed) {
-            this.startRestTimer();
-        }
-    },
-
-    addSet(exIndex) {
-        if (!this.workout) return;
-
-        const lastSet = this.workout.exercises[exIndex].sets.slice(-1)[0];
-        this.workout.exercises[exIndex].sets.push({
-            weight: lastSet?.weight || '',
-            reps: lastSet?.reps || '',
-            completed: false
-        });
 
         Storage.setActiveWorkout(this.workout);
         App.refreshScreen();
     },
 
+    toggleSet(exIndex, setIndex) {
+        if (!this.workout) return;
 
+        const ex = this.workout.exercises[exIndex];
+
+        // If clicking on an uncompleted set, complete it (and all before it)
+        // If clicking on a completed set, uncomplete it (and all after it)
+        if (setIndex < ex.completedSets) {
+            // Uncomplete this and all after
+            ex.completedSets = setIndex;
+        } else {
+            // Complete this and all before
+            ex.completedSets = setIndex + 1;
+            // Start rest timer
+            this.startRestTimer();
+        }
+
+        Storage.setActiveWorkout(this.workout);
+        App.refreshScreen();
+    },
+
+    removeExercise(index) {
+        if (!this.workout) return;
+        this.workout.exercises.splice(index, 1);
+        Storage.setActiveWorkout(this.workout);
+        App.refreshScreen();
+    },
 
     showAddExerciseModal() {
         const exercises = Storage.getExercises();
-        const favorites = exercises.filter(e => e.isFavorite);
 
         const content = `
             <div class="search-bar mb-md">
@@ -269,7 +277,6 @@ const WorkoutScreen = {
                     <div class="empty-state-text">Füge zuerst Übungen in der Übungsverwaltung hinzu.</div>
                 </div>
             ` : ''}
-            
             
             <div id="all-exercises-list">
                 ${Object.keys(MUSCLE_GROUPS).map(muscleId => {
@@ -313,7 +320,6 @@ const WorkoutScreen = {
         if (query) {
             container.innerHTML = filtered.map(ex => this.renderExerciseItem(ex)).join('');
         } else {
-            // Restore grouped view
             container.innerHTML = Object.keys(MUSCLE_GROUPS).map(muscleId => {
                 const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
                 if (muscleExercises.length === 0) return '';
@@ -332,18 +338,13 @@ const WorkoutScreen = {
         if (!this.workout) return;
 
         const lastData = Storage.getLastExerciseData(exerciseId);
-        const sets = lastData && lastData.length > 0
-            ? lastData.map(s => ({
-                weight: s.weight || '',
-                reps: s.reps || '',
-                completed: false,
-                previous: `${s.weight}×${s.reps}`
-            }))
-            : [{ weight: '', reps: '', completed: false }];
 
         this.workout.exercises.push({
             exerciseId: exerciseId,
-            sets: sets
+            weight: lastData?.weight || '',
+            reps: lastData?.reps || '',
+            targetSets: lastData?.targetSets || 3,
+            completedSets: 0
         });
 
         Storage.setActiveWorkout(this.workout);
@@ -439,8 +440,7 @@ const WorkoutScreen = {
         if (!this.workout) return;
 
         // Check if any sets were completed
-        const completedSets = this.workout.exercises.reduce((sum, ex) =>
-            sum + ex.sets.filter(s => s.completed).length, 0);
+        const completedSets = this.workout.exercises.reduce((sum, ex) => sum + ex.completedSets, 0);
 
         if (completedSets === 0) {
             const confirmed = await Modal.confirm({
@@ -456,25 +456,28 @@ const WorkoutScreen = {
         const duration = WorkoutTimer.stop();
         Timer.stop();
 
-        const savedWorkout = Storage.addWorkout({
+        // Convert to storage format
+        const exercisesToSave = this.workout.exercises
+            .filter(ex => ex.completedSets > 0)
+            .map(ex => ({
+                exerciseId: ex.exerciseId,
+                weight: parseFloat(ex.weight) || 0,
+                reps: parseInt(ex.reps) || 0,
+                targetSets: ex.targetSets,
+                completedSets: ex.completedSets
+            }));
+
+        Storage.addWorkout({
             name: this.workout.name,
             templateId: this.workout.templateId,
             date: new Date().toISOString(),
             duration: duration,
-            exercises: this.workout.exercises.map(ex => ({
-                exerciseId: ex.exerciseId,
-                sets: ex.sets.filter(s => s.completed).map(s => ({
-                    weight: parseFloat(s.weight) || 0,
-                    reps: parseInt(s.reps) || 0,
-                    completed: true
-                }))
-            })).filter(ex => ex.sets.length > 0)
+            exercises: exercisesToSave
         });
 
         Storage.clearActiveWorkout();
         this.workout = null;
 
-        // Show success and go home
         App.navigate('home');
     }
 };

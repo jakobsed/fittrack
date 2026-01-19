@@ -196,13 +196,17 @@ const Storage = {
         return this.getWorkoutsInRange(startOfWeek, endOfWeek);
     },
 
-    // Get last workout data for an exercise (for "previous" column)
+    // Get last workout data for an exercise (for pre-filling values)
     getLastExerciseData(exerciseId) {
         const workouts = this.getWorkouts();
         for (const workout of workouts) {
             const exercise = workout.exercises.find(e => e.exerciseId === exerciseId);
-            if (exercise && exercise.sets.length > 0) {
-                return exercise.sets;
+            if (exercise) {
+                return {
+                    weight: exercise.weight || '',
+                    reps: exercise.reps || '',
+                    targetSets: exercise.targetSets || 3
+                };
             }
         }
         return null;
@@ -243,9 +247,8 @@ const Storage = {
             workout.exercises.forEach(ex => {
                 const exercise = this.getExercise(ex.exerciseId);
                 if (exercise) {
-                    const completedSets = ex.sets.filter(s => s.completed).length;
                     setsPerMuscle[exercise.muscleGroup] =
-                        (setsPerMuscle[exercise.muscleGroup] || 0) + completedSets;
+                        (setsPerMuscle[exercise.muscleGroup] || 0) + (ex.completedSets || 0);
                 }
             });
         });
@@ -260,18 +263,11 @@ const Storage = {
 
         for (const workout of workouts) {
             const exercise = workout.exercises.find(e => e.exerciseId === exerciseId);
-            if (exercise) {
-                // Get max weight used in this workout
-                const maxWeight = Math.max(...exercise.sets
-                    .filter(s => s.completed && s.weight > 0)
-                    .map(s => s.weight), 0);
-
-                if (maxWeight > 0) {
-                    progression.push({
-                        date: workout.date,
-                        weight: maxWeight
-                    });
-                }
+            if (exercise && exercise.weight > 0 && exercise.completedSets > 0) {
+                progression.push({
+                    date: workout.date,
+                    weight: exercise.weight
+                });
             }
 
             if (progression.length >= limit) break;

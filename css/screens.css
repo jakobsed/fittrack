@@ -178,55 +178,36 @@
     margin-top: var(--spacing-xs);
 }
 
-.sets-table {
-    width: 100%;
-    border-collapse: collapse;
+/* Exercise Inputs - Simplified */
+.exercise-inputs {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
 }
 
-.sets-table th {
+.input-group-inline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.input-group-inline label {
     font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
     color: var(--color-text-muted);
     text-transform: uppercase;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    text-align: center;
-}
-
-.sets-table td {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    text-align: center;
-    vertical-align: middle;
-}
-
-.sets-table .set-num {
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-secondary);
-    width: 40px;
-}
-
-.sets-table .previous {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-    width: 70px;
-}
-
-.sets-table .input-cell {
-    width: 70px;
-}
-
-.sets-table .check-cell {
-    width: 50px;
+    font-weight: var(--font-weight-medium);
 }
 
 .set-input {
-    width: 60px;
+    width: 70px;
     padding: var(--spacing-sm);
     text-align: center;
     background: var(--color-surface-elevated);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-lg);
 }
 
 .set-input:focus {
@@ -234,32 +215,99 @@
     box-shadow: 0 0 0 2px var(--color-accent-light);
 }
 
-.set-row {
-    transition: opacity var(--transition-fast);
-}
-
-.set-row.completed {
-    opacity: 0.6;
-}
-
-.set-row.completed .set-input {
-    background: var(--color-success-light);
-}
-
-.add-set-btn {
-    width: 100%;
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-sm);
-    color: var(--color-accent);
-    font-weight: var(--font-weight-medium);
-    border: 1px dashed var(--color-border);
+/* Set Counter */
+.set-counter {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
+    padding: 2px;
+}
+
+.counter-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
     transition: all var(--transition-fast);
 }
 
-.add-set-btn:hover {
-    background: var(--color-accent-light);
+.counter-btn:hover {
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
+}
+
+.counter-value {
+    min-width: 24px;
+    text-align: center;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-lg);
+}
+
+/* Set Checkboxes */
+.set-checkboxes {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-sm);
+}
+
+.set-checkbox {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface-elevated);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.set-checkbox .set-number {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+}
+
+.set-checkbox svg {
+    width: 16px;
+    height: 16px;
+    display: none;
+}
+
+.set-checkbox.checked {
+    background: var(--color-accent);
     border-color: var(--color-accent);
+}
+
+.set-checkbox.checked .set-number {
+    display: none;
+}
+
+.set-checkbox.checked svg {
+    display: block;
+    color: var(--color-text-inverse);
+}
+
+.set-checkbox:hover:not(.checked) {
+    border-color: var(--color-accent);
+}
+
+/* Exercise Progress */
+.exercise-progress {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: center;
 }
 
 .rest-timer-card {
