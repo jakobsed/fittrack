@@ -9,7 +9,7 @@ const WorkoutScreen = {
     // Start a workout from a template
     startFromTemplate(templateId) {
         Modal.close();
-        
+
         const template = Storage.getTemplate(templateId);
         if (!template) return;
 
@@ -37,7 +37,7 @@ const WorkoutScreen = {
     // Start an empty workout
     startEmpty() {
         Modal.close();
-        
+
         this.workout = {
             name: 'Freies Workout',
             templateId: null,
@@ -54,12 +54,19 @@ const WorkoutScreen = {
     resume() {
         const active = Storage.getActiveWorkout();
         if (active) {
-            // Validate workout structure - clear if incompatible
+            // Validate workout structure - clear if incompatible with new format
             if (!active.startTime || !Array.isArray(active.exercises)) {
                 Storage.clearActiveWorkout();
                 return false;
             }
-            
+
+            // Check if it's an old-format workout (has sets array instead of targetSets)
+            const hasOldFormat = active.exercises.some(ex => Array.isArray(ex.sets));
+            if (hasOldFormat) {
+                Storage.clearActiveWorkout();
+                return false;
+            }
+
             this.workout = active;
             const elapsed = Math.floor((Date.now() - active.startTime) / 1000);
             WorkoutTimer.elapsed = elapsed;
@@ -218,7 +225,7 @@ const WorkoutScreen = {
 
     updateExercise(index, field, value) {
         if (!this.workout) return;
-        
+
         const numValue = parseFloat(value) || '';
         this.workout.exercises[index][field] = numValue;
         Storage.setActiveWorkout(this.workout);
@@ -226,16 +233,16 @@ const WorkoutScreen = {
 
     adjustSets(index, delta) {
         if (!this.workout) return;
-        
+
         const ex = this.workout.exercises[index];
         const newTarget = Math.max(1, Math.min(10, ex.targetSets + delta));
         ex.targetSets = newTarget;
-        
+
         // Adjust completed sets if needed
         if (ex.completedSets > newTarget) {
             ex.completedSets = newTarget;
         }
-        
+
         Storage.setActiveWorkout(this.workout);
         App.refreshScreen();
     },
@@ -244,7 +251,7 @@ const WorkoutScreen = {
         if (!this.workout) return;
 
         const ex = this.workout.exercises[exIndex];
-        
+
         // If clicking on an uncompleted set, complete it (and all before it)
         // If clicking on a completed set, uncomplete it (and all after it)
         if (setIndex < ex.completedSets) {
@@ -254,7 +261,7 @@ const WorkoutScreen = {
             // Complete this and all before
             ex.completedSets = setIndex + 1;
         }
-        
+
         Storage.setActiveWorkout(this.workout);
         App.refreshScreen();
     },
@@ -288,16 +295,16 @@ const WorkoutScreen = {
             
             <div id="all-exercises-list">
                 ${Object.keys(MUSCLE_GROUPS).map(muscleId => {
-                    const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
-                    if (muscleExercises.length === 0) return '';
-                    
-                    return `
+            const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
+            if (muscleExercises.length === 0) return '';
+
+            return `
                         <div class="exercise-group" data-muscle="${muscleId}">
                             <div class="exercise-group-title">${getMuscleGroup(muscleId).name}</div>
                             ${muscleExercises.map(ex => this.renderExerciseItem(ex)).join('')}
                         </div>
                     `;
-                }).join('')}
+        }).join('')}
             </div>
         `;
 
@@ -318,10 +325,10 @@ const WorkoutScreen = {
 
     filterExercises(query) {
         const exercises = Storage.getExercises();
-        const filtered = exercises.filter(e => 
+        const filtered = exercises.filter(e =>
             e.name.toLowerCase().includes(query.toLowerCase())
         );
-        
+
         const container = document.getElementById('all-exercises-list');
         if (!container) return;
 
@@ -331,7 +338,7 @@ const WorkoutScreen = {
             container.innerHTML = Object.keys(MUSCLE_GROUPS).map(muscleId => {
                 const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
                 if (muscleExercises.length === 0) return '';
-                
+
                 return `
                     <div class="exercise-group" data-muscle="${muscleId}">
                         <div class="exercise-group-title">${getMuscleGroup(muscleId).name}</div>
@@ -346,7 +353,7 @@ const WorkoutScreen = {
         if (!this.workout) return;
 
         const lastData = Storage.getLastExerciseData(exerciseId);
-        
+
         this.workout.exercises.push({
             exerciseId: exerciseId,
             weight: lastData?.weight || '',

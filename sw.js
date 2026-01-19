@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitapp-v1';
+const CACHE_NAME = 'fitapp-v2';
 const ASSETS_TO_CACHE = [
     '/fittrack/',
     '/fittrack/index.html',
