@@ -301,45 +301,53 @@ const WorkoutScreen = {
     },
 
     finishWorkout() {
-        if (!this.workout) return;
+        try {
+            if (!this.workout) {
+                alert('Kein Workout vorhanden');
+                return;
+            }
 
-        // Read current values from inputs
-        this.workout.exercises.forEach((ex, i) => {
-            const weightEl = document.getElementById(`weight-${i}`);
-            const repsEl = document.getElementById(`reps-${i}`);
-            const setsEl = document.getElementById(`sets-${i}`);
+            // Read current values from inputs
+            this.workout.exercises.forEach((ex, i) => {
+                const weightEl = document.getElementById(`weight-${i}`);
+                const repsEl = document.getElementById(`reps-${i}`);
+                const setsEl = document.getElementById(`sets-${i}`);
 
-            if (weightEl) ex.weight = parseFloat(weightEl.value) || 0;
-            if (repsEl) ex.reps = parseInt(repsEl.value) || 0;
-            if (setsEl) ex.sets = parseInt(setsEl.value) || 0;
-        });
-
-        // Save workout
-        const duration = WorkoutTimer.stop();
-
-        // Filter out exercises with no data
-        const exercisesToSave = this.workout.exercises
-            .filter(ex => ex.sets > 0)
-            .map(ex => ({
-                exerciseId: ex.exerciseId,
-                weight: ex.weight,
-                reps: ex.reps,
-                sets: ex.sets
-            }));
-
-        if (exercisesToSave.length > 0) {
-            Storage.addWorkout({
-                name: this.workout.name,
-                templateId: this.workout.templateId,
-                date: new Date().toISOString(),
-                duration: duration,
-                exercises: exercisesToSave
+                if (weightEl) ex.weight = parseFloat(weightEl.value) || 0;
+                if (repsEl) ex.reps = parseInt(repsEl.value) || 0;
+                if (setsEl) ex.sets = parseInt(setsEl.value) || 0;
             });
+
+            // Save workout
+            const duration = WorkoutTimer.stop();
+
+            // Filter out exercises with no data
+            const exercisesToSave = this.workout.exercises
+                .filter(ex => ex.sets > 0)
+                .map(ex => ({
+                    exerciseId: ex.exerciseId,
+                    weight: ex.weight,
+                    reps: ex.reps,
+                    sets: ex.sets
+                }));
+
+            if (exercisesToSave.length > 0) {
+                Storage.addWorkout({
+                    name: this.workout.name,
+                    templateId: this.workout.templateId,
+                    date: new Date().toISOString(),
+                    duration: duration,
+                    exercises: exercisesToSave
+                });
+            }
+
+            Storage.clearActiveWorkout();
+            this.workout = null;
+
+            App.navigate('home');
+        } catch (e) {
+            alert('Fehler: ' + e.message);
+            console.error(e);
         }
-
-        Storage.clearActiveWorkout();
-        this.workout = null;
-
-        App.navigate('home');
     }
 };
