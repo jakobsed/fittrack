@@ -10,7 +10,7 @@ const HomeScreen = {
 
         // Calculate week stats
         const totalSets = weekWorkouts.reduce((sum, w) => {
-            return sum + w.exercises.reduce((s, e) => s + e.sets.filter(set => set.completed).length, 0);
+            return sum + w.exercises.reduce((s, e) => s + (e.sets || 0), 0);
         }, 0);
 
         const totalDuration = weekWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
@@ -84,7 +84,7 @@ const HomeScreen = {
         const dayNum = date.getDate();
 
         const totalSets = workout.exercises.reduce((sum, e) =>
-            sum + e.sets.filter(s => s.completed).length, 0);
+            sum + (e.sets || 0), 0);
 
         const exerciseNames = workout.exercises
             .map(e => Storage.getExercise(e.exerciseId)?.name || 'Unbekannt')
