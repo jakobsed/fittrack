@@ -9,7 +9,7 @@ const WorkoutScreen = {
     // Start a workout from a template
     startFromTemplate(templateId) {
         Modal.close();
-
+        
         const template = Storage.getTemplate(templateId);
         if (!template) return;
 
@@ -37,7 +37,7 @@ const WorkoutScreen = {
     // Start an empty workout
     startEmpty() {
         Modal.close();
-
+        
         this.workout = {
             name: 'Freies Workout',
             templateId: null,
@@ -54,20 +54,33 @@ const WorkoutScreen = {
     resume() {
         const active = Storage.getActiveWorkout();
         if (active) {
+            // Validate workout structure - clear if incompatible
+            if (!active.startTime || !Array.isArray(active.exercises)) {
+                Storage.clearActiveWorkout();
+                return false;
+            }
+            
             this.workout = active;
             const elapsed = Math.floor((Date.now() - active.startTime) / 1000);
             WorkoutTimer.elapsed = elapsed;
             WorkoutTimer.start((e) => this.updateWorkoutTime(e));
+            return true;
         }
+        return false;
     },
 
     render() {
         if (!this.workout) {
             const active = Storage.getActiveWorkout();
             if (active) {
-                this.resume();
+                if (!this.resume()) {
+                    // Resume failed, show home
+                    App.navigate('home');
+                    return '';
+                }
             } else {
-                return '<div class="empty-state"><p>Kein aktives Workout</p></div>';
+                App.navigate('home');
+                return '';
             }
         }
 
@@ -91,9 +104,6 @@ const WorkoutScreen = {
                         <span id="workout-time">${WorkoutTimer.formatTime()}</span>
                     </div>
                 </div>
-
-                <!-- Rest Timer -->
-                <div id="rest-timer-container"></div>
 
                 <!-- Exercises -->
                 <div id="exercises-list">
@@ -208,7 +218,7 @@ const WorkoutScreen = {
 
     updateExercise(index, field, value) {
         if (!this.workout) return;
-
+        
         const numValue = parseFloat(value) || '';
         this.workout.exercises[index][field] = numValue;
         Storage.setActiveWorkout(this.workout);
@@ -216,16 +226,16 @@ const WorkoutScreen = {
 
     adjustSets(index, delta) {
         if (!this.workout) return;
-
+        
         const ex = this.workout.exercises[index];
         const newTarget = Math.max(1, Math.min(10, ex.targetSets + delta));
         ex.targetSets = newTarget;
-
+        
         // Adjust completed sets if needed
         if (ex.completedSets > newTarget) {
             ex.completedSets = newTarget;
         }
-
+        
         Storage.setActiveWorkout(this.workout);
         App.refreshScreen();
     },
@@ -234,7 +244,7 @@ const WorkoutScreen = {
         if (!this.workout) return;
 
         const ex = this.workout.exercises[exIndex];
-
+        
         // If clicking on an uncompleted set, complete it (and all before it)
         // If clicking on a completed set, uncomplete it (and all after it)
         if (setIndex < ex.completedSets) {
@@ -243,10 +253,8 @@ const WorkoutScreen = {
         } else {
             // Complete this and all before
             ex.completedSets = setIndex + 1;
-            // Start rest timer
-            this.startRestTimer();
         }
-
+        
         Storage.setActiveWorkout(this.workout);
         App.refreshScreen();
     },
@@ -280,16 +288,16 @@ const WorkoutScreen = {
             
             <div id="all-exercises-list">
                 ${Object.keys(MUSCLE_GROUPS).map(muscleId => {
-            const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
-            if (muscleExercises.length === 0) return '';
-
-            return `
+                    const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
+                    if (muscleExercises.length === 0) return '';
+                    
+                    return `
                         <div class="exercise-group" data-muscle="${muscleId}">
                             <div class="exercise-group-title">${getMuscleGroup(muscleId).name}</div>
                             ${muscleExercises.map(ex => this.renderExerciseItem(ex)).join('')}
                         </div>
                     `;
-        }).join('')}
+                }).join('')}
             </div>
         `;
 
@@ -310,10 +318,10 @@ const WorkoutScreen = {
 
     filterExercises(query) {
         const exercises = Storage.getExercises();
-        const filtered = exercises.filter(e =>
+        const filtered = exercises.filter(e => 
             e.name.toLowerCase().includes(query.toLowerCase())
         );
-
+        
         const container = document.getElementById('all-exercises-list');
         if (!container) return;
 
@@ -323,7 +331,7 @@ const WorkoutScreen = {
             container.innerHTML = Object.keys(MUSCLE_GROUPS).map(muscleId => {
                 const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
                 if (muscleExercises.length === 0) return '';
-
+                
                 return `
                     <div class="exercise-group" data-muscle="${muscleId}">
                         <div class="exercise-group-title">${getMuscleGroup(muscleId).name}</div>
@@ -338,7 +346,7 @@ const WorkoutScreen = {
         if (!this.workout) return;
 
         const lastData = Storage.getLastExerciseData(exerciseId);
-
+        
         this.workout.exercises.push({
             exerciseId: exerciseId,
             weight: lastData?.weight || '',
@@ -350,68 +358,6 @@ const WorkoutScreen = {
         Storage.setActiveWorkout(this.workout);
         Modal.close();
         App.refreshScreen();
-    },
-
-    startRestTimer() {
-        const settings = Storage.getSettings();
-        const duration = settings.restTimerDuration || 120;
-
-        Timer.start(duration,
-            (remaining) => this.updateRestTimerDisplay(remaining),
-            () => this.onRestTimerComplete()
-        );
-
-        this.renderRestTimer();
-    },
-
-    renderRestTimer() {
-        const container = document.getElementById('rest-timer-container');
-        if (!container) return;
-
-        container.innerHTML = `
-            <div class="rest-timer-card">
-                <div class="rest-timer-label">Pause</div>
-                <div class="rest-timer-time" id="rest-timer-display">${Timer.formatTime()}</div>
-                <div class="rest-timer-controls">
-                    <button class="btn btn-sm btn-outline" onclick="Timer.addTime(-15)">-15s</button>
-                    <button class="btn btn-sm btn-primary" onclick="WorkoutScreen.stopRestTimer()">Weiter</button>
-                    <button class="btn btn-sm btn-outline" onclick="Timer.addTime(15)">+15s</button>
-                </div>
-            </div>
-        `;
-    },
-
-    updateRestTimerDisplay(remaining) {
-        const el = document.getElementById('rest-timer-display');
-        if (el) {
-            el.textContent = Timer.formatTime(remaining);
-            if (remaining <= 10 && remaining > 0) {
-                el.classList.add('warning');
-            } else if (remaining <= 0) {
-                el.classList.remove('warning');
-                el.classList.add('done');
-            }
-        }
-    },
-
-    stopRestTimer() {
-        Timer.stop();
-        const container = document.getElementById('rest-timer-container');
-        if (container) {
-            container.innerHTML = '';
-        }
-    },
-
-    onRestTimerComplete() {
-        const container = document.getElementById('rest-timer-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="rest-timer-card" style="background: var(--color-success-light);">
-                    <div class="rest-timer-time" style="color: var(--color-success);">Pause vorbei</div>
-                    <button class="btn btn-sm btn-primary mt-md" onclick="WorkoutScreen.stopRestTimer()">OK</button>
-                </div>
-            `;
-        }
     },
 
     async confirmCancel() {
@@ -429,7 +375,6 @@ const WorkoutScreen = {
     },
 
     cancelWorkout() {
-        Timer.stop();
         WorkoutTimer.stop();
         Storage.clearActiveWorkout();
         this.workout = null;
@@ -454,7 +399,6 @@ const WorkoutScreen = {
 
         // Save workout
         const duration = WorkoutTimer.stop();
-        Timer.stop();
 
         // Convert to storage format
         const exercisesToSave = this.workout.exercises
