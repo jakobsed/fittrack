@@ -1,6 +1,6 @@
 /* ========================================
    Workout Screen - Fitapp
-   Active workout tracking
+   Active workout tracking - Simplified
    ======================================== */
 
 const WorkoutScreen = {
@@ -23,8 +23,7 @@ const WorkoutScreen = {
                     exerciseId: exId,
                     weight: lastData?.weight || '',
                     reps: lastData?.reps || '',
-                    targetSets: lastData?.targetSets || 3,
-                    completedSets: 0
+                    sets: lastData?.sets || 3
                 };
             })
         };
@@ -53,41 +52,22 @@ const WorkoutScreen = {
     // Resume active workout
     resume() {
         const active = Storage.getActiveWorkout();
-        if (active) {
-            // Validate workout structure - clear if incompatible with new format
-            if (!active.startTime || !Array.isArray(active.exercises)) {
-                Storage.clearActiveWorkout();
-                return false;
-            }
-
-            // Check if it's an old-format workout (has sets array instead of targetSets)
-            const hasOldFormat = active.exercises.some(ex => Array.isArray(ex.sets));
-            if (hasOldFormat) {
-                Storage.clearActiveWorkout();
-                return false;
-            }
-
+        if (active && active.startTime && Array.isArray(active.exercises)) {
             this.workout = active;
             const elapsed = Math.floor((Date.now() - active.startTime) / 1000);
             WorkoutTimer.elapsed = elapsed;
             WorkoutTimer.start((e) => this.updateWorkoutTime(e));
             return true;
         }
+        Storage.clearActiveWorkout();
         return false;
     },
 
     render() {
         if (!this.workout) {
-            const active = Storage.getActiveWorkout();
-            if (active) {
-                if (!this.resume()) {
-                    // Resume failed, show home
-                    App.navigate('home');
-                    return '';
-                }
-            } else {
-                App.navigate('home');
-                return '';
+            if (!this.resume()) {
+                setTimeout(() => App.navigate('home'), 0);
+                return '<div class="empty-state"><p>Kein aktives Workout</p></div>';
             }
         }
 
@@ -143,21 +123,6 @@ const WorkoutScreen = {
 
         const muscle = getMuscleGroup(exercise.muscleGroup);
 
-        // Generate set checkboxes
-        const setCheckboxes = [];
-        for (let i = 0; i < ex.targetSets; i++) {
-            const isCompleted = i < ex.completedSets;
-            setCheckboxes.push(`
-                <div class="set-checkbox ${isCompleted ? 'checked' : ''}" 
-                     onclick="WorkoutScreen.toggleSet(${index}, ${i})">
-                    <span class="set-number">${i + 1}</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </div>
-            `);
-        }
-
         return `
             <div class="exercise-card" data-index="${index}">
                 <div class="exercise-header">
@@ -173,44 +138,35 @@ const WorkoutScreen = {
                     </button>
                 </div>
 
-                <!-- Simplified Input Row -->
+                <!-- Simple Input Row -->
                 <div class="exercise-inputs">
                     <div class="input-group-inline">
                         <label>kg</label>
                         <input type="number" 
                                class="set-input" 
+                               id="weight-${index}"
                                value="${ex.weight}" 
                                placeholder="0"
-                               inputmode="decimal"
-                               onchange="WorkoutScreen.updateExercise(${index}, 'weight', this.value)">
+                               inputmode="decimal">
                     </div>
                     <div class="input-group-inline">
                         <label>Reps</label>
                         <input type="number" 
                                class="set-input" 
+                               id="reps-${index}"
                                value="${ex.reps}" 
                                placeholder="0"
-                               inputmode="numeric"
-                               onchange="WorkoutScreen.updateExercise(${index}, 'reps', this.value)">
+                               inputmode="numeric">
                     </div>
                     <div class="input-group-inline">
                         <label>Sets</label>
-                        <div class="set-counter">
-                            <button class="counter-btn" onclick="WorkoutScreen.adjustSets(${index}, -1)">−</button>
-                            <span class="counter-value">${ex.targetSets}</span>
-                            <button class="counter-btn" onclick="WorkoutScreen.adjustSets(${index}, 1)">+</button>
-                        </div>
+                        <input type="number" 
+                               class="set-input" 
+                               id="sets-${index}"
+                               value="${ex.sets}" 
+                               placeholder="3"
+                               inputmode="numeric">
                     </div>
-                </div>
-
-                <!-- Set Checkboxes -->
-                <div class="set-checkboxes">
-                    ${setCheckboxes.join('')}
-                </div>
-
-                <!-- Progress indicator -->
-                <div class="exercise-progress">
-                    ${ex.completedSets} / ${ex.targetSets} Sets
                 </div>
             </div>
         `;
@@ -221,49 +177,6 @@ const WorkoutScreen = {
         if (el) {
             el.textContent = WorkoutTimer.formatTime(elapsed);
         }
-    },
-
-    updateExercise(index, field, value) {
-        if (!this.workout) return;
-
-        const numValue = parseFloat(value) || '';
-        this.workout.exercises[index][field] = numValue;
-        Storage.setActiveWorkout(this.workout);
-    },
-
-    adjustSets(index, delta) {
-        if (!this.workout) return;
-
-        const ex = this.workout.exercises[index];
-        const newTarget = Math.max(1, Math.min(10, ex.targetSets + delta));
-        ex.targetSets = newTarget;
-
-        // Adjust completed sets if needed
-        if (ex.completedSets > newTarget) {
-            ex.completedSets = newTarget;
-        }
-
-        Storage.setActiveWorkout(this.workout);
-        App.refreshScreen();
-    },
-
-    toggleSet(exIndex, setIndex) {
-        if (!this.workout) return;
-
-        const ex = this.workout.exercises[exIndex];
-
-        // If clicking on an uncompleted set, complete it (and all before it)
-        // If clicking on a completed set, uncomplete it (and all after it)
-        if (setIndex < ex.completedSets) {
-            // Uncomplete this and all after
-            ex.completedSets = setIndex;
-        } else {
-            // Complete this and all before
-            ex.completedSets = setIndex + 1;
-        }
-
-        Storage.setActiveWorkout(this.workout);
-        App.refreshScreen();
     },
 
     removeExercise(index) {
@@ -358,8 +271,7 @@ const WorkoutScreen = {
             exerciseId: exerciseId,
             weight: lastData?.weight || '',
             reps: lastData?.reps || '',
-            targetSets: lastData?.targetSets || 3,
-            completedSets: 0
+            sets: lastData?.sets || 3
         });
 
         Storage.setActiveWorkout(this.workout);
@@ -388,43 +300,42 @@ const WorkoutScreen = {
         App.navigate('home');
     },
 
-    async finishWorkout() {
+    finishWorkout() {
         if (!this.workout) return;
 
-        // Check if any sets were completed
-        const completedSets = this.workout.exercises.reduce((sum, ex) => sum + ex.completedSets, 0);
+        // Read current values from inputs
+        this.workout.exercises.forEach((ex, i) => {
+            const weightEl = document.getElementById(`weight-${i}`);
+            const repsEl = document.getElementById(`reps-${i}`);
+            const setsEl = document.getElementById(`sets-${i}`);
 
-        if (completedSets === 0) {
-            const confirmed = await Modal.confirm({
-                title: 'Keine Sets abgeschlossen',
-                message: 'Du hast noch keine Sets als erledigt markiert. Workout trotzdem beenden?',
-                confirmText: 'Beenden',
-                cancelText: 'Zurück'
-            });
-            if (!confirmed) return;
-        }
+            if (weightEl) ex.weight = parseFloat(weightEl.value) || 0;
+            if (repsEl) ex.reps = parseInt(repsEl.value) || 0;
+            if (setsEl) ex.sets = parseInt(setsEl.value) || 0;
+        });
 
         // Save workout
         const duration = WorkoutTimer.stop();
 
-        // Convert to storage format
+        // Filter out exercises with no data
         const exercisesToSave = this.workout.exercises
-            .filter(ex => ex.completedSets > 0)
+            .filter(ex => ex.sets > 0)
             .map(ex => ({
                 exerciseId: ex.exerciseId,
-                weight: parseFloat(ex.weight) || 0,
-                reps: parseInt(ex.reps) || 0,
-                targetSets: ex.targetSets,
-                completedSets: ex.completedSets
+                weight: ex.weight,
+                reps: ex.reps,
+                sets: ex.sets
             }));
 
-        Storage.addWorkout({
-            name: this.workout.name,
-            templateId: this.workout.templateId,
-            date: new Date().toISOString(),
-            duration: duration,
-            exercises: exercisesToSave
-        });
+        if (exercisesToSave.length > 0) {
+            Storage.addWorkout({
+                name: this.workout.name,
+                templateId: this.workout.templateId,
+                date: new Date().toISOString(),
+                duration: duration,
+                exercises: exercisesToSave
+            });
+        }
 
         Storage.clearActiveWorkout();
         this.workout = null;

@@ -205,7 +205,7 @@ const Storage = {
                 return {
                     weight: exercise.weight || '',
                     reps: exercise.reps || '',
-                    targetSets: exercise.targetSets || 3
+                    sets: exercise.sets || 3
                 };
             }
         }
@@ -248,7 +248,7 @@ const Storage = {
                 const exercise = this.getExercise(ex.exerciseId);
                 if (exercise) {
                     setsPerMuscle[exercise.muscleGroup] =
-                        (setsPerMuscle[exercise.muscleGroup] || 0) + (ex.completedSets || 0);
+                        (setsPerMuscle[exercise.muscleGroup] || 0) + (ex.sets || 0);
                 }
             });
         });
@@ -263,7 +263,7 @@ const Storage = {
 
         for (const workout of workouts) {
             const exercise = workout.exercises.find(e => e.exerciseId === exerciseId);
-            if (exercise && exercise.weight > 0 && exercise.completedSets > 0) {
+            if (exercise && exercise.weight > 0 && exercise.sets > 0) {
                 progression.push({
                     date: workout.date,
                     weight: exercise.weight
