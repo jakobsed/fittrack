@@ -4,6 +4,9 @@
    ======================================== */
 
 const TemplatesScreen = {
+    // Temporary storage for selected exercise IDs during editing
+    selectedExerciseIds: [],
+
     render() {
         const templates = Storage.getTemplates();
 
@@ -91,7 +94,9 @@ const TemplatesScreen = {
     showEditModal(template) {
         const isNew = !template;
         const exercises = Storage.getExercises();
-        const selectedIds = template ? template.exerciseIds : [];
+
+        // Initialize selected exercises
+        this.selectedExerciseIds = template ? [...template.exerciseIds] : [];
 
         const content = `
             <div class="input-group mb-lg">
@@ -102,12 +107,20 @@ const TemplatesScreen = {
             </div>
 
             <div class="mb-md">
-                <label class="input-label">Übungen</label>
-                <p class="text-sm text-secondary mb-md">Wähle die Übungen für diese Vorlage</p>
+                <label class="input-label">Ausgewählte Übungen</label>
+                <p class="text-sm text-secondary mb-sm">Reihenfolge mit Pfeilen ändern</p>
             </div>
 
-            <div id="template-exercises" class="list mb-md" style="max-height: 300px; overflow-y: auto;">
-                ${this.renderExerciseCheckboxes(exercises, selectedIds)}
+            <div id="selected-exercises" class="selected-exercises-list mb-lg">
+                ${this.renderSelectedExercises()}
+            </div>
+
+            <div class="mb-md">
+                <label class="input-label">Übung hinzufügen</label>
+            </div>
+
+            <div id="available-exercises" class="list" style="max-height: 200px; overflow-y: auto;">
+                ${this.renderAvailableExercises(exercises)}
             </div>
         `;
 
@@ -124,27 +137,118 @@ const TemplatesScreen = {
         });
     },
 
-    renderExerciseCheckboxes(exercises, selectedIds) {
+    renderSelectedExercises() {
+        if (this.selectedExerciseIds.length === 0) {
+            return '<div class="text-sm text-secondary" style="padding: var(--spacing-md); text-align: center;">Keine Übungen ausgewählt</div>';
+        }
+
+        return this.selectedExerciseIds.map((id, index) => {
+            const exercise = Storage.getExercise(id);
+            if (!exercise) return '';
+
+            const muscle = getMuscleGroup(exercise.muscleGroup);
+            const isFirst = index === 0;
+            const isLast = index === this.selectedExerciseIds.length - 1;
+
+            return `
+                <div class="selected-exercise-item">
+                    <div class="selected-exercise-info">
+                        <span class="selected-exercise-name">${exercise.name}</span>
+                        <span class="tag tag-${exercise.muscleGroup}">${muscle.name}</span>
+                    </div>
+                    <div class="selected-exercise-actions">
+                        <div class="reorder-arrows">
+                            <button class="arrow-btn ${isFirst ? 'disabled' : ''}" 
+                                    onclick="TemplatesScreen.moveExercise(${index}, -1)"
+                                    ${isFirst ? 'disabled' : ''}>
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                            </button>
+                            <button class="arrow-btn ${isLast ? 'disabled' : ''}" 
+                                    onclick="TemplatesScreen.moveExercise(${index}, 1)"
+                                    ${isLast ? 'disabled' : ''}>
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                        <button class="btn btn-ghost btn-icon-sm" onclick="TemplatesScreen.removeExercise(${index})">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    renderAvailableExercises(exercises) {
+        // Filter out already selected exercises
+        const available = exercises.filter(e => !this.selectedExerciseIds.includes(e.id));
+
+        if (available.length === 0) {
+            return '<div class="text-sm text-secondary" style="padding: var(--spacing-md); text-align: center;">Alle Übungen ausgewählt</div>';
+        }
+
         return Object.keys(MUSCLE_GROUPS).map(muscleId => {
-            const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
+            const muscleExercises = available.filter(e => e.muscleGroup === muscleId);
             if (muscleExercises.length === 0) return '';
 
             return `
                 <div class="exercise-group">
                     <div class="exercise-group-title">${getMuscleGroup(muscleId).name}</div>
                     ${muscleExercises.map(ex => `
-                        <label class="exercise-item" style="cursor: pointer;">
-                            <input type="checkbox" 
-                                   class="template-exercise-checkbox" 
-                                   value="${ex.id}"
-                                   ${selectedIds.includes(ex.id) ? 'checked' : ''}
-                                   style="width: 18px; height: 18px; accent-color: var(--color-accent);">
-                            <span class="exercise-item-name" style="margin-left: var(--spacing-sm);">${ex.name}</span>
-                        </label>
+                        <div class="exercise-item" onclick="TemplatesScreen.addExercise('${ex.id}')" style="cursor: pointer;">
+                            <span class="exercise-item-name">${ex.name}</span>
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--color-accent)" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
                     `).join('')}
                 </div>
             `;
         }).join('');
+    },
+
+    addExercise(exerciseId) {
+        if (!this.selectedExerciseIds.includes(exerciseId)) {
+            this.selectedExerciseIds.push(exerciseId);
+            this.refreshModalLists();
+        }
+    },
+
+    removeExercise(index) {
+        this.selectedExerciseIds.splice(index, 1);
+        this.refreshModalLists();
+    },
+
+    moveExercise(index, direction) {
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= this.selectedExerciseIds.length) return;
+
+        // Swap elements
+        const temp = this.selectedExerciseIds[index];
+        this.selectedExerciseIds[index] = this.selectedExerciseIds[newIndex];
+        this.selectedExerciseIds[newIndex] = temp;
+
+        this.refreshModalLists();
+    },
+
+    refreshModalLists() {
+        const selectedContainer = document.getElementById('selected-exercises');
+        const availableContainer = document.getElementById('available-exercises');
+        const exercises = Storage.getExercises();
+
+        if (selectedContainer) {
+            selectedContainer.innerHTML = this.renderSelectedExercises();
+        }
+        if (availableContainer) {
+            availableContainer.innerHTML = this.renderAvailableExercises(exercises);
+        }
     },
 
     saveTemplate(id) {
@@ -156,18 +260,15 @@ const TemplatesScreen = {
             return;
         }
 
-        const checkboxes = document.querySelectorAll('.template-exercise-checkbox:checked');
-        const exerciseIds = Array.from(checkboxes).map(cb => cb.value);
-
-        if (exerciseIds.length === 0) {
+        if (this.selectedExerciseIds.length === 0) {
             alert('Bitte wähle mindestens eine Übung aus.');
             return;
         }
 
         if (id) {
-            Storage.updateTemplate(id, { name, exerciseIds });
+            Storage.updateTemplate(id, { name, exerciseIds: this.selectedExerciseIds });
         } else {
-            Storage.addTemplate({ name, exerciseIds });
+            Storage.addTemplate({ name, exerciseIds: this.selectedExerciseIds });
         }
 
         Modal.close();
