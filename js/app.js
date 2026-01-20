@@ -10,7 +10,8 @@ const App = {
         workout: WorkoutScreen,
         templates: TemplatesScreen,
         exercises: ExercisesScreen,
-        stats: StatsScreen
+        stats: StatsScreen,
+        settings: SettingsScreen
     },
 
     init() {

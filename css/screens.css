@@ -786,3 +786,95 @@
     opacity: 0.3;
     cursor: not-allowed;
 }
+
+/* ----------------------------------------
+   Header Actions
+   ---------------------------------------- */
+.header-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+/* ----------------------------------------
+   Settings Screen
+   ---------------------------------------- */
+.settings-screen {
+    min-height: 100%;
+}
+
+.settings-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.settings-section-title {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-sm);
+    padding-left: var(--spacing-xs);
+}
+
+.settings-list {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+    background: transparent;
+    text-align: left;
+    transition: background var(--transition-fast);
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-item:hover:not(.settings-item-static) {
+    background: var(--color-background);
+}
+
+.settings-item-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.settings-item-content svg {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+}
+
+.settings-item-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-item-title {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.settings-item-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.settings-item-value {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.settings-item-danger .settings-item-content svg,
+.settings-item-danger .settings-item-title {
+    color: var(--color-error);
+}

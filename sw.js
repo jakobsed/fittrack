@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitapp-v6';
+const CACHE_NAME = 'fitapp-v7';
 const ASSETS_TO_CACHE = [
     '/fittrack/',
     '/fittrack/index.html',
@@ -16,7 +16,8 @@ const ASSETS_TO_CACHE = [
     '/fittrack/js/screens/workout.js',
     '/fittrack/js/screens/templates.js',
     '/fittrack/js/screens/exercises.js',
-    '/fittrack/js/screens/stats.js'
+    '/fittrack/js/screens/stats.js',
+    '/fittrack/js/screens/settings.js'
 ];
 
 // Install event - cache assets
