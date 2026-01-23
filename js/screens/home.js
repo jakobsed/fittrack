@@ -20,13 +20,11 @@ const HomeScreen = {
 
         return `
             <div class="home-screen animate-fade-in">
-                <div class="screen-header">
-                    <h1 class="greeting">
-                        Willkommen
-                    </h1>
+                <!-- Minimal Header -->
+                <div class="home-header">
                     <div class="header-actions">
                         <button class="btn btn-ghost btn-icon" onclick="App.navigate('exercises')" title="Übungen">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="4" y1="21" x2="4" y2="14"></line>
                                 <line x1="4" y1="10" x2="4" y2="3"></line>
                                 <line x1="12" y1="21" x2="12" y2="12"></line>
@@ -39,7 +37,7 @@ const HomeScreen = {
                             </svg>
                         </button>
                         <button class="btn btn-ghost btn-icon" onclick="App.navigate('settings')" title="Einstellungen">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="3"></circle>
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                             </svg>
@@ -47,29 +45,36 @@ const HomeScreen = {
                     </div>
                 </div>
 
-                <!-- Week Stats -->
-                <div class="card mb-lg">
-                    <h3 class="text-sm font-semibold text-secondary mb-md">Diese Woche</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-value">${weekWorkouts.length}</span>
-                            <span class="stat-label">Workouts</span>
+                <!-- Hero Stats Card (Black) -->
+                <div class="stats-card-main">
+                    <div class="stats-card-header">
+                        <span class="stats-card-label">DIESE WOCHE</span>
+                        <span class="stats-card-period">KW ${this.getWeekNumber()}</span>
+                    </div>
+                    <div class="stats-big-numbers">
+                        <div class="stats-big-number">
+                            <span class="stats-big-value">${weekWorkouts.length}</span>
+                            <span class="stats-big-unit">WO</span>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value">${durationStr || '0min'}</span>
-                            <span class="stat-label">Zeit</span>
+                        <div class="stats-big-number">
+                            <span class="stats-big-value">${totalSets}</span>
+                            <span class="stats-big-unit">SETS</span>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value">${totalSets}</span>
-                            <span class="stat-label">Sets</span>
+                        <div class="stats-big-number">
+                            <span class="stats-big-value">${hours > 0 ? hours : mins}</span>
+                            <span class="stats-big-unit">${hours > 0 ? 'HR' : 'MIN'}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Week Planning -->
-                <div class="section-title">Wochenplan</div>
-                <div class="week-planner">
-                    ${this.renderWeekDays(weekPlan)}
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <span class="stats-card-label">WOCHENPLAN</span>
+                    </div>
+                    <div class="week-planner-inner">
+                        ${this.renderWeekDays(weekPlan)}
+                    </div>
                 </div>
 
                 <!-- Start Workout Button -->
@@ -102,6 +107,12 @@ const HomeScreen = {
         const onejan = new Date(year, 0, 1);
         const week = Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
         return `${year}-W${String(week).padStart(2, '0')}`;
+    },
+
+    getWeekNumber() {
+        const now = new Date();
+        const onejan = new Date(now.getFullYear(), 0, 1);
+        return Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
     },
 
     getWeekDates() {

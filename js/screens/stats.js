@@ -22,9 +22,6 @@ const StatsScreen = {
 
         return `
             <div class="stats-screen animate-fade-in">
-                <div class="screen-header">
-                    <h1 class="screen-title">Statistiken</h1>
-                </div>
 
                 <!-- Time Range Tabs -->
                 <div class="stats-tabs mb-lg">

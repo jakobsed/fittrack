@@ -1205,3 +1205,51 @@
     color: var(--color-text-muted);
     font-size: var(--font-size-sm);
 }
+
+/* ----------------------------------------
+   Minimal Headers
+   ---------------------------------------- */
+.home-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--spacing-md);
+}
+
+.minimal-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--spacing-lg);
+}
+
+.minimal-header-with-back {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.back-btn-minimal {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    transition: background var(--transition-fast);
+}
+
+.back-btn-minimal:hover {
+    background: var(--color-background);
+}
+
+.week-planner-inner {
+    margin-top: var(--spacing-sm);
+}
+
+/* Ghost button text uppercase */
+.btn-ghost.btn-sm {
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.5px;
+    font-weight: var(--font-weight-semibold);
+}

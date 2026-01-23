@@ -12,21 +12,19 @@ const ExercisesScreen = {
 
         return `
             <div class="exercises-screen animate-fade-in">
-                <div class="screen-header">
-                    <div class="screen-header-left">
-                        <button class="back-btn" onclick="App.navigate('home')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="15 18 9 12 15 6"></polyline>
-                            </svg>
-                        </button>
-                        <h1 class="screen-title">Übungen</h1>
-                    </div>
-                    <button class="btn btn-primary btn-sm" onclick="ExercisesScreen.showCreateModal()">
+                <!-- Minimal Header -->
+                <div class="minimal-header-with-back">
+                    <button class="back-btn-minimal" onclick="App.navigate('home')">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <button class="btn btn-ghost btn-sm" onclick="ExercisesScreen.showCreateModal()">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                        Neu
+                        NEU
                     </button>
                 </div>
 

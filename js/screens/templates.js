@@ -12,14 +12,14 @@ const TemplatesScreen = {
 
         return `
             <div class="templates-screen animate-fade-in">
-                <div class="screen-header">
-                    <h1 class="screen-title">Vorlagen</h1>
-                    <button class="btn btn-primary btn-sm" onclick="TemplatesScreen.showCreateModal()">
+                <!-- Minimal Header -->
+                <div class="minimal-header">
+                    <button class="btn btn-ghost btn-sm" onclick="TemplatesScreen.showCreateModal()">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                        Neu
+                        NEU
                     </button>
                 </div>
 
