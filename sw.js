@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitapp-v10';
+const CACHE_NAME = 'fitapp-v11';
 const ASSETS_TO_CACHE = [
     '/fittrack/',
     '/fittrack/index.html',
@@ -11,7 +11,6 @@ const ASSETS_TO_CACHE = [
     '/fittrack/js/storage.js',
     '/fittrack/js/components/timer.js',
     '/fittrack/js/components/modal.js',
-    '/fittrack/js/components/charts.js',
     '/fittrack/js/screens/home.js',
     '/fittrack/js/screens/workout.js',
     '/fittrack/js/screens/templates.js',
