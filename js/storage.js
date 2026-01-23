@@ -10,7 +10,8 @@ const Storage = {
         TEMPLATES: 'fitapp_templates',
         WORKOUTS: 'fitapp_workouts',
         ACTIVE_WORKOUT: 'fitapp_active_workout',
-        SETTINGS: 'fitapp_settings'
+        SETTINGS: 'fitapp_settings',
+        WEEK_PLAN: 'fitapp_week_plan'
     },
 
     // ========================================

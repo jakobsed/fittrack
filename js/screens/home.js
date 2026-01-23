@@ -1,12 +1,12 @@
 /* ========================================
    Home Screen - Fitapp
-   Dashboard with stats and recent workouts
+   Dashboard with week planning
    ======================================== */
 
 const HomeScreen = {
     render() {
-        const recentWorkouts = Storage.getRecentWorkouts(5);
         const weekWorkouts = Storage.getThisWeekWorkouts();
+        const weekPlan = this.getWeekPlan();
 
         // Calculate week stats
         const totalSets = weekWorkouts.reduce((sum, w) => {
@@ -66,20 +66,11 @@ const HomeScreen = {
                     </div>
                 </div>
 
-                <!-- Recent Workouts -->
-                <div class="section-title">Letzte Workouts</div>
-                ${recentWorkouts.length > 0 ? `
-                    <div class="recent-workouts">
-                        ${recentWorkouts.map(w => this.renderWorkoutItem(w)).join('')}
-                    </div>
-                ` : `
-                    <div class="empty-state">
-                        <div class="empty-state-title">Noch keine Workouts</div>
-                        <div class="empty-state-text">
-                            Starte dein erstes Workout und beginne deinen Fortschritt zu tracken.
-                        </div>
-                    </div>
-                `}
+                <!-- Week Planning -->
+                <div class="section-title">Wochenplan</div>
+                <div class="week-planner">
+                    ${this.renderWeekDays(weekPlan)}
+                </div>
 
                 <!-- Start Workout Button -->
                 <button class="btn btn-primary btn-lg btn-full start-workout-btn" onclick="HomeScreen.showStartWorkoutModal()">
@@ -92,35 +83,142 @@ const HomeScreen = {
         `;
     },
 
-    renderWorkoutItem(workout) {
-        const date = new Date(workout.date);
-        const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-        const dayName = dayNames[date.getDay()];
-        const dayNum = date.getDate();
+    getWeekPlan() {
+        const weekKey = this.getCurrentWeekKey();
+        const allPlans = Storage.get(Storage.KEYS.WEEK_PLAN) || {};
+        return allPlans[weekKey] || {};
+    },
 
-        const totalSets = workout.exercises.reduce((sum, e) =>
-            sum + (e.sets || 0), 0);
+    saveWeekPlan(plan) {
+        const weekKey = this.getCurrentWeekKey();
+        const allPlans = Storage.get(Storage.KEYS.WEEK_PLAN) || {};
+        allPlans[weekKey] = plan;
+        Storage.set(Storage.KEYS.WEEK_PLAN, allPlans);
+    },
 
-        const exerciseNames = workout.exercises
-            .map(e => Storage.getExercise(e.exerciseId)?.name || 'Unbekannt')
-            .slice(0, 3)
-            .join(', ');
+    getCurrentWeekKey() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const onejan = new Date(year, 0, 1);
+        const week = Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+        return `${year}-W${String(week).padStart(2, '0')}`;
+    },
+
+    getWeekDates() {
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            days.push(date);
+        }
+        return days;
+    },
+
+    renderWeekDays(weekPlan) {
+        const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+        const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        const weekDates = this.getWeekDates();
+        const today = new Date();
+        const todayStr = today.toDateString();
 
         return `
-            <div class="workout-history-item" onclick="HomeScreen.viewWorkout('${workout.id}')">
-                <div class="workout-history-date">
-                    <span class="workout-history-day">${dayName}</span>
-                    <span class="workout-history-num">${dayNum}</span>
-                </div>
-                <div class="workout-history-content">
-                    <div class="workout-history-name">${workout.name || 'Workout'}</div>
-                    <div class="workout-history-stats">${totalSets} Sets · ${exerciseNames}</div>
-                </div>
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-text-muted);">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
+            <div class="week-days">
+                ${days.map((day, i) => {
+            const dateObj = weekDates[i];
+            const dateStr = dateObj.toDateString();
+            const isToday = dateStr === todayStr;
+            const dayKey = dayKeys[i];
+            const templateId = weekPlan[dayKey];
+            const template = templateId ? Storage.getTemplate(templateId) : null;
+            const dayNum = dateObj.getDate();
+
+            return `
+                        <div class="week-day ${isToday ? 'today' : ''} ${template ? 'has-workout' : ''}" 
+                             onclick="HomeScreen.showDayModal('${dayKey}', '${day}')">
+                            <span class="week-day-name">${day}</span>
+                            <span class="week-day-num">${dayNum}</span>
+                            ${template ? `
+                                <span class="week-day-template">${this.getTemplateAbbrev(template.name)}</span>
+                            ` : `
+                                <span class="week-day-empty">+</span>
+                            `}
+                        </div>
+                    `;
+        }).join('')}
             </div>
         `;
+    },
+
+    getTemplateAbbrev(name) {
+        // Get first 2-3 chars of each word
+        return name.split(/\s+/)
+            .map(w => w.substring(0, 2))
+            .join('')
+            .substring(0, 4)
+            .toUpperCase();
+    },
+
+    showDayModal(dayKey, dayName) {
+        const templates = Storage.getTemplates();
+        const weekPlan = this.getWeekPlan();
+        const currentTemplateId = weekPlan[dayKey];
+
+        const content = `
+            <div class="list">
+                ${templates.length > 0 ? `
+                    ${templates.map(t => `
+                        <div class="list-item ${t.id === currentTemplateId ? 'selected' : ''}" 
+                             onclick="HomeScreen.assignTemplate('${dayKey}', '${t.id}')">
+                            <div class="list-item-content">
+                                <div class="list-item-title">${t.name}</div>
+                                <div class="list-item-subtitle">${t.exerciseIds.length} Übungen</div>
+                            </div>
+                            ${t.id === currentTemplateId ? `
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--color-accent)" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                ` : `
+                    <div class="empty-state">
+                        <div class="empty-state-text">Erstelle zuerst eine Vorlage</div>
+                    </div>
+                `}
+                
+                ${currentTemplateId ? `
+                    <button class="btn btn-outline btn-full mt-md" onclick="HomeScreen.clearDay('${dayKey}')" style="color: var(--color-error); border-color: var(--color-error);">
+                        Planung entfernen
+                    </button>
+                ` : ''}
+            </div>
+        `;
+
+        Modal.showSheet({
+            title: `${dayName} planen`,
+            content: content
+        });
+    },
+
+    assignTemplate(dayKey, templateId) {
+        const weekPlan = this.getWeekPlan();
+        weekPlan[dayKey] = templateId;
+        this.saveWeekPlan(weekPlan);
+        Modal.close();
+        App.refreshScreen();
+    },
+
+    clearDay(dayKey) {
+        const weekPlan = this.getWeekPlan();
+        delete weekPlan[dayKey];
+        this.saveWeekPlan(weekPlan);
+        Modal.close();
+        App.refreshScreen();
     },
 
     showStartWorkoutModal() {

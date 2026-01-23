@@ -25,7 +25,7 @@ const TemplatesScreen = {
 
                 ${templates.length > 0 ? `
                     <div class="templates-list">
-                        ${templates.map(t => this.renderTemplate(t)).join('')}
+                        ${templates.map((t, index) => this.renderTemplate(t, index, templates.length)).join('')}
                     </div>
                 ` : `
                     <div class="empty-state">
@@ -42,19 +42,37 @@ const TemplatesScreen = {
         `;
     },
 
-    renderTemplate(template) {
+    renderTemplate(template, index, total) {
         const exercises = template.exerciseIds
             .map(id => Storage.getExercise(id)?.name)
             .filter(Boolean);
 
         const exerciseList = exercises.slice(0, 4).join(', ');
         const moreCount = exercises.length - 4;
+        const isFirst = index === 0;
+        const isLast = index === total - 1;
 
         return `
             <div class="template-card">
                 <div class="template-header">
                     <h3 class="template-name">${template.name}</h3>
                     <div class="template-actions">
+                        <div class="reorder-arrows-horizontal">
+                            <button class="arrow-btn-sm ${isFirst ? 'disabled' : ''}" 
+                                    onclick="TemplatesScreen.moveTemplate(${index}, -1)"
+                                    ${isFirst ? 'disabled' : ''} title="Nach oben">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                            </button>
+                            <button class="arrow-btn-sm ${isLast ? 'disabled' : ''}" 
+                                    onclick="TemplatesScreen.moveTemplate(${index}, 1)"
+                                    ${isLast ? 'disabled' : ''} title="Nach unten">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                        </div>
                         <button class="btn btn-ghost btn-icon-sm" onclick="TemplatesScreen.editTemplate('${template.id}')">
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -272,6 +290,22 @@ const TemplatesScreen = {
         }
 
         Modal.close();
+        App.refreshScreen();
+    },
+
+    moveTemplate(index, direction) {
+        const templates = Storage.getTemplates();
+        const newIndex = index + direction;
+
+        if (newIndex < 0 || newIndex >= templates.length) return;
+
+        // Swap templates
+        const temp = templates[index];
+        templates[index] = templates[newIndex];
+        templates[newIndex] = temp;
+
+        // Save reordered list
+        Storage.set(Storage.KEYS.TEMPLATES, templates);
         App.refreshScreen();
     },
 
