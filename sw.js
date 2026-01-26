@@ -1,22 +1,22 @@
 const CACHE_NAME = 'fitapp-v11';
 const ASSETS_TO_CACHE = [
-    '/fittrack/',
-    '/fittrack/index.html',
-    '/fittrack/css/variables.css',
-    '/fittrack/css/base.css',
-    '/fittrack/css/components.css',
-    '/fittrack/css/screens.css',
-    '/fittrack/js/app.js',
-    '/fittrack/js/data.js',
-    '/fittrack/js/storage.js',
-    '/fittrack/js/components/timer.js',
-    '/fittrack/js/components/modal.js',
-    '/fittrack/js/screens/home.js',
-    '/fittrack/js/screens/workout.js',
-    '/fittrack/js/screens/templates.js',
-    '/fittrack/js/screens/exercises.js',
-    '/fittrack/js/screens/stats.js',
-    '/fittrack/js/screens/settings.js'
+    './',
+    './index.html',
+    './css/variables.css',
+    './css/base.css',
+    './css/components.css',
+    './css/screens.css',
+    './js/app.js',
+    './js/data.js',
+    './js/storage.js',
+    './js/components/timer.js',
+    './js/components/modal.js',
+    './js/screens/home.js',
+    './js/screens/workout.js',
+    './js/screens/templates.js',
+    './js/screens/exercises.js',
+    './js/screens/stats.js',
+    './js/screens/settings.js'
 ];
 
 // Install event - cache assets

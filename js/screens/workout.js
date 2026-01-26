@@ -81,7 +81,7 @@ const WorkoutScreen = {
                                 <polyline points="15 18 9 12 15 6"></polyline>
                             </svg>
                         </button>
-                        <h1 class="screen-title" style="font-size: var(--font-size-lg);">${this.workout.name}</h1>
+                        <h1 class="screen-title" style="font-size: var(--font-size-lg);">${App.escapeHTML(this.workout.name)}</h1>
                     </div>
                     <div class="workout-timer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -127,7 +127,7 @@ const WorkoutScreen = {
             <div class="exercise-card" data-index="${index}">
                 <div class="exercise-header">
                     <div class="exercise-info">
-                        <div class="exercise-name">${exercise.name}</div>
+                        <div class="exercise-name">${App.escapeHTML(exercise.name)}</div>
                         <span class="tag tag-${exercise.muscleGroup} exercise-muscle">${muscle.name}</span>
                     </div>
                     <button class="btn btn-ghost btn-icon-sm" onclick="WorkoutScreen.removeExercise(${index})">
@@ -230,7 +230,7 @@ const WorkoutScreen = {
     renderExerciseItem(ex) {
         return `
             <div class="exercise-item" onclick="WorkoutScreen.addExercise('${ex.id}')">
-                <span class="exercise-item-name">${ex.name}</span>
+                <span class="exercise-item-name">${App.escapeHTML(ex.name)}</span>
                 <span class="tag tag-${ex.muscleGroup}">${getMuscleGroup(ex.muscleGroup).name}</span>
             </div>
         `;

@@ -116,7 +116,7 @@ const ExercisesScreen = {
 
         return `
             <div class="exercise-item">
-                <span class="exercise-item-name">${ex.name}</span>
+                <span class="exercise-item-name">${App.escapeHTML(ex.name)}</span>
                 <span class="tag tag-${ex.muscleGroup}">${muscle.name}</span>
                 <button class="btn btn-ghost btn-icon-sm" 
                         onclick="event.stopPropagation(); ExercisesScreen.deleteExercise('${ex.id}')">
@@ -194,7 +194,7 @@ const ExercisesScreen = {
 
         const confirmed = await Modal.confirm({
             title: 'Übung löschen?',
-            message: `"${exercise.name}" wird unwiderruflich gelöscht.`,
+            message: `"${App.escapeHTML(exercise.name)}" wird unwiderruflich gelöscht.`,
             confirmText: 'Löschen',
             cancelText: 'Abbrechen',
             danger: true

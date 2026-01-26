@@ -39,10 +39,24 @@ const App = {
         const navItems = document.querySelectorAll('.nav-item');
         navItems.forEach(item => {
             item.addEventListener('click', () => {
-                const screen = item.dataset.screen;
-                this.navigate(screen);
+                if (item.dataset.screen) {
+                    const screen = item.dataset.screen;
+                    this.navigate(screen);
+                } else if (item.dataset.action) {
+                    const action = item.dataset.action;
+                    this.handleAction(action);
+                }
             });
         });
+    },
+
+    handleAction(action) {
+        if (action === 'quick-add') {
+            // Show quick action modal with options
+            if (QuickActionModal && typeof QuickActionModal.show === 'function') {
+                QuickActionModal.show();
+            }
+        }
     },
 
     navigate(screen) {
@@ -100,6 +114,16 @@ const App = {
         navItems.forEach(item => {
             item.classList.toggle('active', item.dataset.screen === this.currentScreen);
         });
+    },
+
+    escapeHTML(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 };
 

@@ -305,6 +305,10 @@ const Storage = {
     getSettings() {
         return this.get(this.KEYS.SETTINGS) || {
             restTimerDuration: 120, // 2 minutes in seconds
+            // Dashboard weekly targets
+            weeklyTargetSets: 45,
+            weeklyTargetMuscles: 18,
+            weeklyTargetExercises: 12
         };
     },
 

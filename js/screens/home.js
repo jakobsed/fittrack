@@ -1,275 +1,296 @@
 /* ========================================
    Home Screen - Fitapp
-   Dashboard with week planning
+   Dashboard with MacroFactor Style (Dynamic Data)
    ======================================== */
 
 const HomeScreen = {
     render() {
+        // Get real data from Storage
         const weekWorkouts = Storage.getThisWeekWorkouts();
-        const weekPlan = this.getWeekPlan();
+        const settings = Storage.getSettings();
 
-        // Calculate week stats
-        const totalSets = weekWorkouts.reduce((sum, w) => {
-            return sum + w.exercises.reduce((s, e) => s + (e.sets || 0), 0);
-        }, 0);
+        // Calculate actual stats from workouts
+        const totalSets = this.calculateTotalSets(weekWorkouts);
+        const targetSets = settings.weeklyTargetSets || 45;
+        const setsLeft = Math.max(0, targetSets - totalSets);
 
-        const totalDuration = weekWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
-        const hours = Math.floor(totalDuration / 3600);
-        const mins = Math.floor((totalDuration % 3600) / 60);
-        const durationStr = hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
+        const totalMuscles = this.calculateUniqueMuscles(weekWorkouts);
+        const targetMuscles = settings.weeklyTargetMuscles || 18;
+        const musclesLeft = Math.max(0, targetMuscles - totalMuscles);
+
+        const totalExercises = this.calculateUniqueExercises(weekWorkouts);
+        const targetExercises = settings.weeklyTargetExercises || 12;
+        const exercisesLeft = Math.max(0, targetExercises - totalExercises);
+
+        // Date formatting strings
+        const now = new Date();
+        const options = { weekday: 'long', month: 'long', day: 'numeric' };
+        const dateString = now.toLocaleDateString('en-US', options).toUpperCase();
 
         return `
             <div class="home-screen animate-fade-in">
-                <!-- Minimal Header -->
+                <!-- Header -->
                 <div class="home-header">
-                    <div class="header-actions">
-                        <button class="btn btn-ghost btn-icon" onclick="App.navigate('exercises')" title="Übungen">
-                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="4" y1="21" x2="4" y2="14"></line>
-                                <line x1="4" y1="10" x2="4" y2="3"></line>
-                                <line x1="12" y1="21" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12" y2="3"></line>
-                                <line x1="20" y1="21" x2="20" y2="16"></line>
-                                <line x1="20" y1="12" x2="20" y2="3"></line>
-                                <line x1="1" y1="14" x2="7" y2="14"></line>
-                                <line x1="9" y1="8" x2="15" y2="8"></line>
-                                <line x1="17" y1="16" x2="23" y2="16"></line>
-                            </svg>
-                        </button>
-                        <button class="btn btn-ghost btn-icon" onclick="App.navigate('settings')" title="Einstellungen">
-                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="3"></circle>
-                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                            </svg>
-                        </button>
-                    </div>
+                    <div class="home-date">${dateString}</div>
+                    <div class="home-title">DASHBOARD</div>
                 </div>
 
-                <!-- Hero Stats Card (Black) -->
-                <div class="stats-card-main">
-                    <div class="stats-card-header">
-                        <span class="stats-card-label">DIESE WOCHE</span>
-                        <span class="stats-card-period">KW ${this.getWeekNumber()}</span>
+                <!-- Weekly Workouts Section -->
+                <div class="section-header">Weekly Workouts</div>
+
+                <div class="dashboard-stats-row">
+                    <!-- Left Circle: Muscles -->
+                    <div class="stat-circle-group">
+                        ${this.renderProgressRing(totalMuscles, targetMuscles, 'ring-blue', false, musclesLeft)}
+                        <div class="stat-label-bottom">
+                            <span class="stat-name">Muscles</span>
+                            <span class="stat-target">${targetMuscles} target</span>
+                        </div>
                     </div>
-                    <div class="stats-big-numbers">
-                        <div class="stats-big-number">
-                            <span class="stats-big-value">${weekWorkouts.length}</span>
-                            <span class="stats-big-unit">WO</span>
+
+                    <!-- Center Circle: Sets (Main) -->
+                    <div class="stat-circle-group main">
+                        ${this.renderProgressRing(totalSets, targetSets, 'ring-orange', true, setsLeft)}
+                        <div class="stat-label-bottom">
+                            <span class="stat-name">Sets</span>
+                            <span class="stat-target">${targetSets} target</span>
                         </div>
-                        <div class="stats-big-number">
-                            <span class="stats-big-value">${totalSets}</span>
-                            <span class="stats-big-unit">SETS</span>
-                        </div>
-                        <div class="stats-big-number">
-                            <span class="stats-big-value">${hours > 0 ? hours : mins}</span>
-                            <span class="stats-big-unit">${hours > 0 ? 'HR' : 'MIN'}</span>
+                    </div>
+
+                    <!-- Right Circle: Exercises -->
+                    <div class="stat-circle-group">
+                        ${this.renderProgressRing(totalExercises, targetExercises, 'ring-teal', false, exercisesLeft)}
+                        <div class="stat-label-bottom">
+                            <span class="stat-name">Exercises</span>
+                            <span class="stat-target">${targetExercises} target</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Week Planning -->
-                <div class="stats-card">
-                    <div class="stats-card-header">
-                        <span class="stats-card-label">WOCHENPLAN</span>
-                    </div>
-                    <div class="week-planner-inner">
-                        ${this.renderWeekDays(weekPlan)}
+                <!-- Toggles -->
+                <div class="dashboard-toggles-container">
+                    <div class="dashboard-toggles">
+                        <button class="toggle-btn active">All Workouts</button>
+                        <button class="toggle-btn inactive">Active Program</button>
                     </div>
                 </div>
 
-                <!-- Start Workout Button -->
-                <button class="btn btn-primary btn-lg btn-full start-workout-btn" onclick="HomeScreen.showStartWorkoutModal()">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                    Workout starten
-                </button>
+                <!-- Scroll Dots -->
+                <div class="section-scroll-dots">
+                    <div class="scroll-dot active"></div>
+                    <div class="scroll-dot"></div>
+                </div>
+
+                <!-- Insights & Analytics -->
+                <div class="section-header">Insights & Analytics</div>
+
+                <div class="insights-grid">
+                    <!-- Workouts Graph Card -->
+                    <div class="insight-card">
+                        <div class="insight-title">Workouts</div>
+                        <div class="insight-subtitle">Last 7 Workouts</div>
+                        
+                        <div class="insight-chart-container">
+                            ${this.renderBarChart()}
+                        </div>
+                        
+                        <div class="insight-footer">
+                            <span class="dataset-value">${this.getTotalSetsFromRecentWorkouts()} <span class="dataset-unit">sets</span></span>
+                            <svg class="chevron-right" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </div>
+                    </div>
+
+                    <!-- Weight Trend Card -->
+                    <div class="insight-card">
+                        <div class="insight-title">Weight Trend</div>
+                        <div class="insight-subtitle">Last 7 Days</div>
+                         
+                        <div class="insight-chart-container">
+                             ${this.renderLineChart()}
+                        </div>
+                        
+                        <div class="insight-footer">
+                            <span class="dataset-value">249.4 <span class="dataset-unit">lbs</span></span>
+                            <svg class="chevron-right" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Spacer for Bottom Nav and aesthetic balance -->
+                <div style="height: 120px;"></div>
             </div>
         `;
     },
 
-    getWeekPlan() {
-        const weekKey = this.getCurrentWeekKey();
-        const allPlans = Storage.get(Storage.KEYS.WEEK_PLAN) || {};
-        return allPlans[weekKey] || {};
-    },
+    renderProgressRing(value, max, colorClass, isMain = false, remaining) {
+        const radius = isMain ? 52 : 36; // Larger main ring
+        const stroke = isMain ? 8 : 6;
+        const normalizedRadius = radius - stroke / 2;
+        const circumference = normalizedRadius * 2 * Math.PI;
 
-    saveWeekPlan(plan) {
-        const weekKey = this.getCurrentWeekKey();
-        const allPlans = Storage.get(Storage.KEYS.WEEK_PLAN) || {};
-        allPlans[weekKey] = plan;
-        Storage.set(Storage.KEYS.WEEK_PLAN, allPlans);
-    },
+        // Ensure visual fill doesn't exceed 100%
+        const safeValue = Math.min(value, max);
+        const strokeDashoffset = circumference - (safeValue / max) * circumference;
 
-    getCurrentWeekKey() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const onejan = new Date(year, 0, 1);
-        const week = Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
-        return `${year}-W${String(week).padStart(2, '0')}`;
-    },
-
-    getWeekNumber() {
-        const now = new Date();
-        const onejan = new Date(now.getFullYear(), 0, 1);
-        return Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
-    },
-
-    getWeekDates() {
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-
-        const days = [];
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(monday);
-            date.setDate(monday.getDate() + i);
-            days.push(date);
-        }
-        return days;
-    },
-
-    renderWeekDays(weekPlan) {
-        const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-        const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-        const weekDates = this.getWeekDates();
-        const today = new Date();
-        const todayStr = today.toDateString();
+        const size = radius * 2;
 
         return `
-            <div class="week-days">
-                ${days.map((day, i) => {
-            const dateObj = weekDates[i];
-            const dateStr = dateObj.toDateString();
-            const isToday = dateStr === todayStr;
-            const dayKey = dayKeys[i];
-            const templateId = weekPlan[dayKey];
-            const template = templateId ? Storage.getTemplate(templateId) : null;
-            const dayNum = dateObj.getDate();
+            <div class="progress-ring-container ${colorClass}" style="width:${size}px; height:${size}px;">
+                <svg
+                    height="${size}"
+                    width="${size}"
+                    class="progress-ring"
+                    >
+                    <circle
+                        class="ring-bg"
+                        stroke-width="${stroke}"
+                        fill="transparent"
+                        r="${normalizedRadius}"
+                        cx="${size / 2}"
+                        cy="${size / 2}"
+                    />
+                    <circle
+                        class="ring-progress"
+                        stroke-width="${stroke}"
+                        stroke-dasharray="${circumference} ${circumference}"
+                        style="stroke-dashoffset: ${strokeDashoffset}"
+                        fill="transparent"
+                        r="${normalizedRadius}"
+                        cx="${size / 2}"
+                        cy="${size / 2}"
+                    />
+                </svg>
+                <div class="ring-content">
+                    <span class="ring-value ${isMain ? 'value-lg' : ''}">${value}</span>
+                    <span class="ring-label">${remaining} left</span>
+                </div>
+            </div>
+        `;
+    },
 
-            return `
-                        <div class="week-day ${isToday ? 'today' : ''} ${template ? 'has-workout' : ''}" 
-                             onclick="HomeScreen.showDayModal('${dayKey}', '${day}')">
-                            <span class="week-day-name">${day}</span>
-                            <span class="week-day-num">${dayNum}</span>
-                            ${template ? `
-                                <span class="week-day-template">${this.getTemplateAbbrev(template.name)}</span>
-                            ` : `
-                                <span class="week-day-empty">+</span>
-                            `}
-                        </div>
-                    `;
+    renderBarChart() {
+        // Get real workout data for last 7 workouts
+        const chartData = this.getBarChartData();
+        const maxSets = Math.max(...chartData, 1); // Avoid division by zero
+
+        return `
+            <div class="bar-chart">
+                ${chartData.map(sets => {
+            const height = (sets / maxSets) * 100;
+            return `<div class="bar" style="height: ${height}%"></div>`;
         }).join('')}
             </div>
         `;
     },
 
-    getTemplateAbbrev(name) {
-        // Get first 2-3 chars of each word
-        return name.split(/\s+/)
-            .map(w => w.substring(0, 2))
-            .join('')
-            .substring(0, 4)
-            .toUpperCase();
-    },
-
-    showDayModal(dayKey, dayName) {
-        const templates = Storage.getTemplates();
-        const weekPlan = this.getWeekPlan();
-        const currentTemplateId = weekPlan[dayKey];
-
-        const content = `
-            <div class="list">
-                ${templates.length > 0 ? `
-                    ${templates.map(t => `
-                        <div class="list-item ${t.id === currentTemplateId ? 'selected' : ''}" 
-                             onclick="HomeScreen.assignTemplate('${dayKey}', '${t.id}')">
-                            <div class="list-item-content">
-                                <div class="list-item-title">${t.name}</div>
-                                <div class="list-item-subtitle">${t.exerciseIds.length} Übungen</div>
-                            </div>
-                            ${t.id === currentTemplateId ? `
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--color-accent)" stroke-width="2">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                ` : `
-                    <div class="empty-state">
-                        <div class="empty-state-text">Erstelle zuerst eine Vorlage</div>
-                    </div>
-                `}
-                
-                ${currentTemplateId ? `
-                    <button class="btn btn-outline btn-full mt-md" onclick="HomeScreen.clearDay('${dayKey}')" style="color: var(--color-error); border-color: var(--color-error);">
-                        Planung entfernen
-                    </button>
-                ` : ''}
-            </div>
+    renderLineChart() {
+        // Weight trend - placeholder for now, can be connected to weight logging
+        return `
+            <svg viewBox="0 0 100 40" class="line-chart" preserveAspectRatio="none">
+                <defs>
+                     <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.2"/>
+                        <stop offset="100%" stop-color="#A78BFA" stop-opacity="0"/>
+                    </linearGradient>
+                </defs>
+                <polyline 
+                    points="5,30 20,28 35,25 50,26 65,20 80,18 95,15" 
+                    fill="none" 
+                    stroke="#A78BFA" 
+                    stroke-width="2" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+                <circle cx="5" cy="30" r="2" fill="#1C1C1E" stroke="#A78BFA" stroke-width="2"/>
+                <circle cx="20" cy="28" r="2" fill="#1C1C1E" stroke="#A78BFA" stroke-width="2"/>
+                <circle cx="35" cy="25" r="2" fill="#1C1C1E" stroke="#A78BFA" stroke-width="2"/>
+                <circle cx="50" cy="26" r="2" fill="#1C1C1E" stroke="#A78BFA" stroke-width="2"/>
+                <circle cx="65" cy="20" r="2" fill="#1C1C1E" stroke="#A78BFA" stroke-width="2"/>
+                <circle cx="80" cy="18" r="2" fill="#1C1C1E" stroke="#A78BFA" stroke-width="2"/>
+                <circle cx="95" cy="15" r="2" fill="#1C1C1E" stroke="#A78BFA" stroke-width="2"/>
+            </svg>
         `;
+    },
 
-        Modal.showSheet({
-            title: `${dayName} planen`,
-            content: content
+    // ========================================
+    // Helper Functions for Dynamic Data
+    // ========================================
+
+    calculateTotalSets(workouts) {
+        if (!workouts || workouts.length === 0) return 0;
+
+        let total = 0;
+        workouts.forEach(workout => {
+            if (workout.exercises) {
+                workout.exercises.forEach(ex => {
+                    total += ex.sets || 0;
+                });
+            }
         });
+        return total;
     },
 
-    assignTemplate(dayKey, templateId) {
-        const weekPlan = this.getWeekPlan();
-        weekPlan[dayKey] = templateId;
-        this.saveWeekPlan(weekPlan);
-        Modal.close();
-        App.refreshScreen();
-    },
+    calculateUniqueMuscles(workouts) {
+        if (!workouts || workouts.length === 0) return 0;
 
-    clearDay(dayKey) {
-        const weekPlan = this.getWeekPlan();
-        delete weekPlan[dayKey];
-        this.saveWeekPlan(weekPlan);
-        Modal.close();
-        App.refreshScreen();
-    },
-
-    showStartWorkoutModal() {
-        const templates = Storage.getTemplates();
-
-        const content = `
-            <div class="list">
-                ${templates.length > 0 ? `
-                    <div class="section-title">Vorlage wählen</div>
-                    ${templates.map(t => `
-                        <div class="list-item" onclick="WorkoutScreen.startFromTemplate('${t.id}')">
-                            <div class="list-item-content">
-                                <div class="list-item-title">${t.name}</div>
-                                <div class="list-item-subtitle">${t.exerciseIds.length} Übungen</div>
-                            </div>
-                            <svg class="list-item-action" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </div>
-                    `).join('')}
-                    <div class="divider-text">oder</div>
-                ` : ''}
-                <button class="btn btn-outline btn-full" onclick="WorkoutScreen.startEmpty()">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Freies Workout starten
-                </button>
-            </div>
-        `;
-
-        Modal.showSheet({
-            title: 'Workout starten',
-            content: content
+        const muscles = new Set();
+        workouts.forEach(workout => {
+            if (workout.exercises) {
+                workout.exercises.forEach(ex => {
+                    const exercise = Storage.getExercise(ex.exerciseId);
+                    if (exercise && exercise.muscleGroup) {
+                        muscles.add(exercise.muscleGroup);
+                    }
+                });
+            }
         });
+        return muscles.size;
     },
 
-    viewWorkout(id) {
-        // TODO: Show workout details
-        console.log('View workout:', id);
+    calculateUniqueExercises(workouts) {
+        if (!workouts || workouts.length === 0) return 0;
+
+        const exercises = new Set();
+        workouts.forEach(workout => {
+            if (workout.exercises) {
+                workout.exercises.forEach(ex => {
+                    exercises.add(ex.exerciseId);
+                });
+            }
+        });
+        return exercises.size;
+    },
+
+    getBarChartData() {
+        // Get last 7 workouts and their sets
+        const recentWorkouts = Storage.getRecentWorkouts(7);
+
+        if (recentWorkouts.length === 0) {
+            // Return placeholder data if no workouts
+            return [0, 0, 0, 0, 0, 0, 0];
+        }
+
+        // Pad with zeros if less than 7 workouts
+        const data = recentWorkouts.map(workout => {
+            if (!workout.exercises) return 0;
+            return workout.exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0);
+        });
+
+        while (data.length < 7) {
+            data.unshift(0);
+        }
+
+        return data.slice(-7);
+    },
+
+    getTotalSetsFromRecentWorkouts() {
+        const recentWorkouts = Storage.getRecentWorkouts(7);
+        if (recentWorkouts.length === 0) return 0;
+
+        // Return sets from most recent workout
+        const lastWorkout = recentWorkouts[0];
+        if (!lastWorkout || !lastWorkout.exercises) return 0;
+
+        return lastWorkout.exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0);
     }
 };
