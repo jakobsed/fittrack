@@ -24,9 +24,12 @@ body {
     font-weight: var(--font-weight-regular);
     line-height: var(--line-height-normal);
     color: var(--color-text-primary);
-    background-color: var(--color-background);
+    background-color: #111;
+    /* Dark background for desktop area outside app */
     min-height: 100vh;
     min-height: 100dvh;
+    display: flex;
+    justify-content: center;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -36,11 +39,16 @@ body {
 #app {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: var(--max-width);
     min-height: 100vh;
     min-height: 100dvh;
-    max-width: var(--max-width);
     margin: 0 auto;
     position: relative;
+    background-color: var(--color-background);
+    /* App background */
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    /* Shadow for desktop */
 }
 
 /* Main Content */

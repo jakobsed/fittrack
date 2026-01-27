@@ -41,22 +41,8 @@ const ExercisesScreen = {
                            oninput="ExercisesScreen.search(this.value)">
                 </div>
 
-                <!-- Filters -->
-                <div class="filter-tabs">
-                    <button class="filter-tab ${this.filter === 'all' ? 'active' : ''}" 
-                            onclick="ExercisesScreen.setFilter('all')">
-                        Alle
-                    </button>
-                    ${Object.keys(MUSCLE_GROUPS).map(id => `
-                        <button class="filter-tab ${this.filter === id ? 'active' : ''}" 
-                                onclick="ExercisesScreen.setFilter('${id}')">
-                            ${getMuscleGroup(id).name}
-                        </button>
-                    `).join('')}
-                </div>
-
                 <!-- Exercise List -->
-                <div class="exercises-list">
+                <div class="exercises-list exercise-list-clean">
                     ${this.renderExerciseList(exercises)}
                 </div>
             </div>
@@ -71,11 +57,6 @@ const ExercisesScreen = {
             exercises = exercises.filter(e =>
                 e.name.toLowerCase().includes(this.searchQuery.toLowerCase())
             );
-        }
-
-        // Apply filter
-        if (this.filter !== 'all') {
-            exercises = exercises.filter(e => e.muscleGroup === this.filter);
         }
 
         return exercises;
@@ -94,7 +75,7 @@ const ExercisesScreen = {
         }
 
         // Group by muscle if showing all
-        if (this.filter === 'all' && !this.searchQuery) {
+        if (!this.searchQuery) {
             return Object.keys(MUSCLE_GROUPS).map(muscleId => {
                 const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
                 if (muscleExercises.length === 0) return '';
@@ -112,12 +93,12 @@ const ExercisesScreen = {
     },
 
     renderExerciseItem(ex) {
-        const muscle = getMuscleGroup(ex.muscleGroup);
-
         return `
             <div class="exercise-item">
-                <span class="exercise-item-name">${App.escapeHTML(ex.name)}</span>
-                <span class="tag tag-${ex.muscleGroup}">${muscle.name}</span>
+                <div style="flex: 1;">
+                    <span class="exercise-item-name">${App.escapeHTML(ex.name)}</span>
+                    <span class="exercise-item-subtitle">${getMuscleGroup(ex.muscleGroup).name}</span>
+                </div>
                 <button class="btn btn-ghost btn-icon-sm" 
                         onclick="event.stopPropagation(); ExercisesScreen.deleteExercise('${ex.id}')">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">

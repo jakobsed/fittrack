@@ -190,7 +190,7 @@ const WorkoutScreen = {
         const exercises = Storage.getExercises();
 
         const content = `
-            <div class="search-bar mb-md">
+            <div class="search-bar mb-md" style="margin-top: var(--spacing-sm);">
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -206,7 +206,7 @@ const WorkoutScreen = {
                 </div>
             ` : ''}
             
-            <div id="all-exercises-list">
+            <div id="all-exercises-list" class="exercise-list-clean">
                 ${Object.keys(MUSCLE_GROUPS).map(muscleId => {
             const muscleExercises = exercises.filter(e => e.muscleGroup === muscleId);
             if (muscleExercises.length === 0) return '';
@@ -230,8 +230,16 @@ const WorkoutScreen = {
     renderExerciseItem(ex) {
         return `
             <div class="exercise-item" onclick="WorkoutScreen.addExercise('${ex.id}')">
-                <span class="exercise-item-name">${App.escapeHTML(ex.name)}</span>
-                <span class="tag tag-${ex.muscleGroup}">${getMuscleGroup(ex.muscleGroup).name}</span>
+                <div>
+                    <span class="exercise-item-name">${App.escapeHTML(ex.name)}</span>
+                    <span class="exercise-item-subtitle">${getMuscleGroup(ex.muscleGroup).name}</span>
+                </div>
+                <div class="list-item-action">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </div>
             </div>
         `;
     },

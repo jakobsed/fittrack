@@ -208,9 +208,21 @@
 /* ----------------------------------------
    Dashboard (Home Screen) - Refined
    ---------------------------------------- */
+.dashboard-hero {
+    background-color: var(--color-background-light);
+    margin: calc(-1 * var(--spacing-md));
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    padding-top: var(--spacing-xl);
+    /* Increased top padding */
+    padding-bottom: var(--spacing-lg);
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
+}
+
 .home-header {
     margin-bottom: var(--spacing-lg);
-    padding-top: var(--spacing-md);
+    padding-top: var(--spacing-xs);
 }
 
 .home-date {
@@ -246,9 +258,9 @@
 .dashboard-stats-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    /* Center align items */
-    margin-bottom: var(--spacing-xl);
+    align-items: flex-end;
+    /* Align bottom */
+    margin-bottom: var(--spacing-sm);
     padding: 0 var(--spacing-xs);
 }
 
@@ -263,7 +275,7 @@
 .stat-circle-group.main {
     flex: 1.4;
     /* Middle one occupies more space */
-    margin-top: -10px;
+    margin-bottom: 0;
 }
 
 .progress-ring-container {
@@ -800,9 +812,55 @@
     left: var(--spacing-md);
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
+    color: var(--color-text-secondary);
+    pointer-events: none;
+}
+
+/* Redesigned Clean Exercise List */
+.exercise-list-clean .exercise-group-title {
+    font-size: var(--font-size-sm);
     color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    padding-left: var(--spacing-xs);
+}
+
+.exercise-list-clean .exercise-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-xs);
+    border-bottom: 1px solid var(--color-border);
+    background: transparent;
+    /* Clean look */
+    border-radius: 0;
+}
+
+.exercise-list-clean .exercise-item:last-child {
+    border-bottom: none;
+}
+
+.exercise-list-clean .exercise-item-name {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    display: block;
+}
+
+.exercise-list-clean .exercise-item-subtitle {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+top: 50%;
+transform: translateY(-50%);
+width: 20px;
+height: 20px;
+color: var(--color-text-muted);
 }
 
 .filter-tabs {

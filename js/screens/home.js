@@ -29,49 +29,53 @@ const HomeScreen = {
 
         return `
             <div class="home-screen animate-fade-in">
-                <!-- Header -->
-                <div class="home-header">
-                    <div class="home-date">${dateString}</div>
-                    <div class="home-title">DASHBOARD</div>
-                </div>
+                
+                <!-- Hero Section (Light Background) -->
+                <div class="dashboard-hero">
+                    <!-- Header -->
+                    <div class="home-header">
+                        <div class="home-date">${dateString}</div>
+                        <div class="home-title">DASHBOARD</div>
+                    </div>
 
-                <!-- Weekly Workouts Section -->
-                <div class="section-header">Weekly Workouts</div>
+                    <!-- Weekly Workouts Section -->
+                    <div class="section-header">Weekly Workouts</div>
 
-                <div class="dashboard-stats-row">
-                    <!-- Left Circle: Muscles -->
-                    <div class="stat-circle-group">
-                        ${this.renderProgressRing(totalMuscles, targetMuscles, 'ring-blue', false, musclesLeft)}
-                        <div class="stat-label-bottom">
-                            <span class="stat-name">Muscles</span>
-                            <span class="stat-target">${targetMuscles} target</span>
+                    <div class="dashboard-stats-row">
+                        <!-- Left Circle: Muscles -->
+                        <div class="stat-circle-group">
+                            ${this.renderProgressRing(totalMuscles, targetMuscles, 'ring-blue', false, musclesLeft)}
+                            <div class="stat-label-bottom">
+                                <span class="stat-name">Muscles</span>
+                                <span class="stat-target">${targetMuscles} target</span>
+                            </div>
+                        </div>
+
+                        <!-- Center Circle: Sets (Main) -->
+                        <div class="stat-circle-group main">
+                            ${this.renderProgressRing(totalSets, targetSets, 'ring-orange', true, setsLeft)}
+                            <div class="stat-label-bottom">
+                                <span class="stat-name">Sets</span>
+                                <span class="stat-target">${targetSets} target</span>
+                            </div>
+                        </div>
+
+                        <!-- Right Circle: Exercises -->
+                        <div class="stat-circle-group">
+                            ${this.renderProgressRing(totalExercises, targetExercises, 'ring-teal', false, exercisesLeft)}
+                            <div class="stat-label-bottom">
+                                <span class="stat-name">Exercises</span>
+                                <span class="stat-target">${targetExercises} target</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Center Circle: Sets (Main) -->
-                    <div class="stat-circle-group main">
-                        ${this.renderProgressRing(totalSets, targetSets, 'ring-orange', true, setsLeft)}
-                        <div class="stat-label-bottom">
-                            <span class="stat-name">Sets</span>
-                            <span class="stat-target">${targetSets} target</span>
+                    <!-- Toggles (Now inside Hero) -->
+                    <div class="dashboard-toggles-container" style="margin-top: var(--spacing-lg); margin-bottom: 0;">
+                        <div class="dashboard-toggles">
+                            <button class="toggle-btn active">All Workouts</button>
+                            <button class="toggle-btn inactive">Active Program</button>
                         </div>
-                    </div>
-
-                    <!-- Right Circle: Exercises -->
-                    <div class="stat-circle-group">
-                        ${this.renderProgressRing(totalExercises, targetExercises, 'ring-teal', false, exercisesLeft)}
-                        <div class="stat-label-bottom">
-                            <span class="stat-name">Exercises</span>
-                            <span class="stat-target">${targetExercises} target</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Toggles -->
-                <div class="dashboard-toggles-container">
-                    <div class="dashboard-toggles">
-                        <button class="toggle-btn active">All Workouts</button>
-                        <button class="toggle-btn inactive">Active Program</button>
                     </div>
                 </div>
 
@@ -80,51 +84,15 @@ const HomeScreen = {
                     <div class="scroll-dot active"></div>
                     <div class="scroll-dot"></div>
                 </div>
-
-                <!-- Insights & Analytics -->
-                <div class="section-header">Insights & Analytics</div>
-
-                <div class="insights-grid">
-                    <!-- Workouts Graph Card -->
-                    <div class="insight-card">
-                        <div class="insight-title">Workouts</div>
-                        <div class="insight-subtitle">Last 7 Workouts</div>
-                        
-                        <div class="insight-chart-container">
-                            ${this.renderBarChart()}
-                        </div>
-                        
-                        <div class="insight-footer">
-                            <span class="dataset-value">${this.getTotalSetsFromRecentWorkouts()} <span class="dataset-unit">sets</span></span>
-                            <svg class="chevron-right" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </div>
-                    </div>
-
-                    <!-- Weight Trend Card -->
-                    <div class="insight-card">
-                        <div class="insight-title">Weight Trend</div>
-                        <div class="insight-subtitle">Last 7 Days</div>
-                         
-                        <div class="insight-chart-container">
-                             ${this.renderLineChart()}
-                        </div>
-                        
-                        <div class="insight-footer">
-                            <span class="dataset-value">249.4 <span class="dataset-unit">lbs</span></span>
-                            <svg class="chevron-right" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </div>
-                    </div>
-                </div>
                 
-                <!-- Spacer for Bottom Nav and aesthetic balance -->
-                <div style="height: 120px;"></div>
+                <!-- ... -->
             </div>
         `;
     },
 
     renderProgressRing(value, max, colorClass, isMain = false, remaining) {
-        const radius = isMain ? 52 : 36; // Larger main ring
-        const stroke = isMain ? 8 : 6;
+        const radius = isMain ? 70 : 48;
+        const stroke = isMain ? 6 : 4; // Thinner stroke
         const normalizedRadius = radius - stroke / 2;
         const circumference = normalizedRadius * 2 * Math.PI;
 
